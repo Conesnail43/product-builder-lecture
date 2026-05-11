@@ -40,35 +40,26 @@
                     <h2 id="commentsTitle">당첨 소식 나누기</h2>
                 </div>
                 <div id="disqus_thread"></div>
-                <p class="disqus-status" id="disqusStatus">댓글 기능을 불러오는 중입니다.</p>
                 <script>
+                    /**
+                    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+                    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+                    */
                     var disqus_config = function () {
                         this.page.url = window.location.href.split('#')[0];
                         this.page.identifier = 'lotto-pick-comments';
                     };
 
-                    (function() {
+                    (function() { // DON'T EDIT BELOW THIS LINE
                         var d = document, s = d.createElement('script');
                         s.src = 'https://test-site-wfuvobj7s9.disqus.com/embed.js';
                         s.setAttribute('data-timestamp', +new Date());
-                        s.onload = function() {
-                            var status = d.getElementById('disqusStatus');
-                            if (status) {
-                                status.textContent = '';
-                            }
-                        };
-                        s.onerror = function() {
-                            var status = d.getElementById('disqusStatus');
-                            if (status) {
-                                status.textContent = '댓글 기능을 불러오지 못했습니다. 브라우저 차단 설정이나 Disqus 도메인 설정을 확인해주세요.';
-                            }
-                        };
                         (d.head || d.body).appendChild(s);
                     })();
                 </script>
                 <noscript>
-                    JavaScript를 활성화하면
-                    <a href="https://disqus.com/?ref_noscript">Disqus 댓글</a>을 볼 수 있습니다.
+                    Please enable JavaScript to view the
+                    <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
                 </noscript>
             </section>
 

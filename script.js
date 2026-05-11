@@ -44,8 +44,23 @@ function renderTicket(game, index, isCompact) {
         .join('');
     const bonusClass = getBallColorClass(game.bonusNumber);
 
+    if (isCompact) {
+        return `
+            <div class="ticket compact">
+                <span class="game-label">${index + 1}게임</span>
+                <div class="number-line">
+                    <div class="balls">
+                        ${mainBalls}
+                    </div>
+                    <span class="plus">+</span>
+                    <div class="bonus-ball active ${bonusClass}">${game.bonusNumber}</div>
+                </div>
+            </div>
+        `;
+    }
+
     return `
-        <div class="ticket ${isCompact ? 'compact' : ''}">
+        <div class="ticket">
             <div class="ticket-header">
                 <span class="ticket-mark">LOTTO</span>
                 <span class="game-label">${index + 1}게임</span>
@@ -59,7 +74,6 @@ function renderTicket(game, index, isCompact) {
             <div class="bonus-row">
                 <span class="plus">+</span>
                 <div class="bonus-ball active ${bonusClass}">${game.bonusNumber}</div>
-                <span class="bonus-label">Bonus</span>
             </div>
         </div>
     `;
@@ -85,7 +99,6 @@ function renderPlaceholderTicket() {
             <div class="bonus-row">
                 <span class="plus">+</span>
                 <div class="bonus-ball">?</div>
-                <span class="bonus-label">Bonus</span>
             </div>
         </div>
     `;

@@ -428,12 +428,30 @@ h1 {
     background: var(--accent-dark);
 }
 
+.comments-section,
 .contact-form {
     display: grid;
     gap: 14px;
     margin-top: 28px;
     padding-top: 24px;
     border-top: 1px solid var(--line);
+}
+
+.comments-section {
+    min-height: 220px;
+}
+
+#disqus_thread {
+    min-height: 180px;
+}
+
+.comments-section noscript {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.comments-section a {
+    color: var(--accent);
 }
 
 .form-heading {

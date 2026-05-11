@@ -1,31 +1,275 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 40px;
-    background-color: #f4f4f4;
-    text-align: center;
+:root {
+    color-scheme: light;
+    --bg: #f6f2ea;
+    --panel: #fffdf8;
+    --panel-strong: #ffffff;
+    --text: #20242a;
+    --muted: #70747c;
+    --line: #e4ded2;
+    --accent: #f35b2f;
+    --accent-dark: #c83d18;
+    --gold: #f4b63f;
+    --blue: #3466d6;
+    --green: #2f9b6c;
+    --shadow: 0 24px 60px rgba(82, 67, 43, 0.18);
 }
 
-h1 {
-    color: #333;
+body.dark {
+    color-scheme: dark;
+    --bg: #15171c;
+    --panel: #20242c;
+    --panel-strong: #292e38;
+    --text: #f4f6f8;
+    --muted: #a9b0bd;
+    --line: #3a404b;
+    --accent: #ff7a4d;
+    --accent-dark: #ff916d;
+    --gold: #ffd166;
+    --blue: #7fa5ff;
+    --green: #62d29d;
+    --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+        radial-gradient(circle at 20% 18%, rgba(244, 182, 63, 0.24), transparent 28%),
+        radial-gradient(circle at 80% 12%, rgba(52, 102, 214, 0.16), transparent 26%),
+        var(--bg);
+    color: var(--text);
+    transition: background-color 180ms ease, color 180ms ease;
 }
 
 button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
+    font: inherit;
+}
+
+.app-shell {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 32px 18px;
+}
+
+.lotto-panel {
+    width: min(720px, 100%);
+    padding: 28px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    box-shadow: var(--shadow);
+}
+
+.topbar,
+.ticket-header,
+.bonus-row {
+    display: flex;
+    align-items: center;
+}
+
+.topbar {
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 26px;
+}
+
+.eyebrow {
+    margin: 0 0 6px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(38px, 7vw, 64px);
+    line-height: 1;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 104px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel-strong);
+    color: var(--text);
     cursor: pointer;
-    margin: 20px 0;
 }
 
-button:hover {
-    background-color: #45a049;
+.toggle-icon {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #1d1b16;
+    font-size: 14px;
 }
 
-#lottoDisplay {
-    margin-top: 20px;
+.ticket {
+    position: relative;
+    overflow: hidden;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--panel-strong) 86%, var(--gold)), var(--panel-strong)),
+        var(--panel-strong);
+}
+
+.ticket::before,
+.ticket::after {
+    position: absolute;
+    top: 50%;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--panel);
+    content: "";
+    transform: translateY(-50%);
+}
+
+.ticket::before {
+    left: -17px;
+}
+
+.ticket::after {
+    right: -17px;
+}
+
+.ticket-header {
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.ticket-mark {
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: var(--text);
+    color: var(--panel);
+    font-weight: 900;
+}
+
+.ticket-date {
+    color: var(--muted);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.balls {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(54px, 1fr));
+    gap: 12px;
+}
+
+.ball,
+.bonus-ball {
+    display: grid;
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: 50%;
+    color: #111318;
+    font-size: clamp(22px, 5vw, 34px);
+    font-weight: 900;
+    box-shadow: inset 0 -8px 16px rgba(0, 0, 0, 0.16), 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.ball:nth-child(1),
+.ball:nth-child(6) {
+    background: var(--gold);
+}
+
+.ball:nth-child(2),
+.ball:nth-child(5) {
+    background: #ff8a65;
+}
+
+.ball:nth-child(3) {
+    background: var(--blue);
+    color: white;
+}
+
+.ball:nth-child(4) {
+    background: var(--green);
+    color: white;
+}
+
+.ball.placeholder,
+.bonus-ball {
+    background: color-mix(in srgb, var(--line) 72%, var(--panel-strong));
+    color: var(--muted);
+}
+
+.bonus-row {
+    justify-content: center;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.plus {
+    color: var(--muted);
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.bonus-ball {
+    width: 70px;
+    height: 70px;
+}
+
+.bonus-ball.active {
+    background: #d9b8ff;
+    color: #25113c;
+}
+
+.bonus-label {
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.generate-button {
+    width: 100%;
+    min-height: 58px;
+    margin-top: 22px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--accent);
+    color: white;
     font-size: 18px;
-    color: #555;
-    min-height: 50px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 14px 26px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.generate-button:hover {
+    background: var(--accent-dark);
+}
+
+@media (max-width: 620px) {
+    .lotto-panel {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .topbar {
+        align-items: flex-start;
+    }
+
+    .balls {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }

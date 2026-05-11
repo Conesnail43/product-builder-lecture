@@ -56,7 +56,8 @@
                     <section class="camera-card" aria-label="카메라 분석">
                         <div class="camera-frame" id="imageStage">
                             <div class="camera-placeholder" id="cameraPlaceholder">
-                                <span class="placeholder-mark">FACE</span>
+                                <span class="placeholder-mark">+</span>
+                                <span class="placeholder-copy">사진을 촬영하거나 업로드하세요</span>
                             </div>
                             <div id="webcam-container"></div>
                             <img class="preview-image" id="previewImage" alt="분석할 얼굴 사진" hidden>
@@ -68,10 +69,12 @@
                             <button class="secondary-button" id="stopBtn" type="button" disabled>정지</button>
                         </div>
 
-                        <label class="upload-control" for="imageUpload">
-                            <span>사진 업로드</span>
+                        <label class="upload-control button-like" for="imageUpload">
+                            <span>사진 선택해서 분석</span>
                             <input id="imageUpload" type="file" accept="image/*">
                         </label>
+
+                        <button class="secondary-button reset-button" id="resetAnimalBtn" type="button">사진 초기화</button>
 
                         <canvas id="captureCanvas" width="360" height="360" hidden></canvas>
 
@@ -85,6 +88,7 @@
                     <section class="result-card" aria-label="분석 결과">
                         <div class="result-hero">
                             <p class="result-label">현재 결과</p>
+                            <div class="animal-badge" id="animalBadge" aria-hidden="true">?</div>
                             <h2 id="topAnimal">대기 중</h2>
                             <p class="result-caption" id="resultCaption">사진을 촬영하거나 업로드하면 가장 가까운 동물상이 표시됩니다.</p>
                             <div class="score-ring" id="topScore">0%</div>

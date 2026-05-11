@@ -22,18 +22,36 @@ const webcamContainer = document.getElementById('webcam-container');
 const cameraPlaceholder = document.getElementById('cameraPlaceholder');
 const previewImage = document.getElementById('previewImage');
 const imageUpload = document.getElementById('imageUpload');
+const resetAnimalBtn = document.getElementById('resetAnimalBtn');
 const captureCanvas = document.getElementById('captureCanvas');
 const labelContainer = document.getElementById('label-container');
 const topAnimal = document.getElementById('topAnimal');
 const topScore = document.getElementById('topScore');
+const animalBadge = document.getElementById('animalBadge');
 const statusText = document.getElementById('statusText');
 const resultCaption = document.getElementById('resultCaption');
 
-const RESULT_COPY = {
-    '강아지': '밝고 친근한 인상이 강하게 잡혔습니다.',
-    '고양이': '차분하고 또렷한 분위기가 두드러집니다.',
-    '사슴': '부드럽고 맑은 인상이 가장 높게 나왔습니다.',
-    '공룡': '개성 있고 선명한 인상이 강하게 잡혔습니다.'
+const ANIMAL_RESULTS = {
+    '강아지': {
+        badge: 'DOG',
+        tone: 'dog',
+        copy: '밝고 친근한 인상이 강하게 잡혔습니다.'
+    },
+    '고양이': {
+        badge: 'CAT',
+        tone: 'cat',
+        copy: '차분하고 또렷한 분위기가 두드러집니다.'
+    },
+    '사슴': {
+        badge: 'DEER',
+        tone: 'deer',
+        copy: '부드럽고 맑은 인상이 가장 높게 나왔습니다.'
+    },
+    '공룡': {
+        badge: 'DINO',
+        tone: 'dino',
+        copy: '개성 있고 선명한 인상이 강하게 잡혔습니다.'
+    }
 };
 
 function setTheme(theme) {
@@ -161,18 +179,34 @@ function setStatus(message) {
 function resetAnimalResults() {
     topAnimal.textContent = '대기 중';
     topScore.textContent = '0%';
+    animalBadge.textContent = '?';
+    animalBadge.className = 'animal-badge';
     resultCaption.textContent = '사진을 촬영하거나 업로드하면 가장 가까운 동물상이 표시됩니다.';
     labelContainer.innerHTML = '<div class="empty-state">카메라로 촬영하거나 사진 파일을 업로드하면 결과가 표시됩니다.</div>';
+}
+
+function resetAnimalImage() {
+    stopTest();
+    clearObjectUrl();
+    previewImage.removeAttribute('src');
+    previewImage.hidden = true;
+    cameraPlaceholder.hidden = false;
+    imageUpload.value = '';
+    resetAnimalResults();
+    setStatus('모델을 불러올 준비가 되었습니다.');
 }
 
 function renderPredictions(predictions) {
     const sortedPredictions = [...predictions].sort((a, b) => b.probability - a.probability);
     const best = sortedPredictions[0];
     const bestScore = Math.round(best.probability * 100);
+    const resultMeta = ANIMAL_RESULTS[best.className];
 
     topAnimal.textContent = best.className;
     topScore.textContent = `${bestScore}%`;
-    resultCaption.textContent = RESULT_COPY[best.className] || '가장 높은 확률의 동물상이 표시되었습니다.';
+    animalBadge.textContent = resultMeta?.badge || best.className;
+    animalBadge.className = `animal-badge ${resultMeta?.tone || ''}`.trim();
+    resultCaption.textContent = resultMeta?.copy || '가장 높은 확률의 동물상이 표시되었습니다.';
 
     labelContainer.innerHTML = sortedPredictions.map((prediction) => {
         const score = Math.round(prediction.probability * 100);
@@ -344,6 +378,7 @@ stopBtn.addEventListener('click', function() {
     setStatus('카메라가 정지되었습니다.');
 });
 imageUpload.addEventListener('change', handleImageUpload);
+resetAnimalBtn.addEventListener('click', resetAnimalImage);
 
 setTheme(localStorage.getItem('sandbox-theme') || 'light');
 updateGenerateButtonText();

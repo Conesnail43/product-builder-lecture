@@ -1,43 +1,33 @@
 :root {
     color-scheme: light;
-    --bg: #f6f2ea;
+    --bg: #f2efe8;
     --panel: #fffdf8;
     --panel-strong: #ffffff;
     --text: #20242a;
-    --muted: #70747c;
-    --line: #e4ded2;
-    --accent: #f35b2f;
-    --accent-dark: #c83d18;
-    --gold: #f4b63f;
-    --blue: #3466d6;
-    --green: #2f9b6c;
-    --lotto-yellow: #fbc400;
-    --lotto-blue: #5f8ee4;
-    --lotto-red: #f05b5b;
-    --lotto-gray: #8f98a3;
-    --lotto-green: #57b96f;
-    --shadow: 0 24px 60px rgba(82, 67, 43, 0.18);
+    --muted: #6f7580;
+    --line: #e2dbce;
+    --accent: #2f8f83;
+    --accent-dark: #1f6f66;
+    --warm: #f4b45f;
+    --rose: #e9697a;
+    --blue: #5987d7;
+    --shadow: 0 24px 60px rgba(73, 62, 44, 0.18);
 }
 
 body.dark {
     color-scheme: dark;
-    --bg: #15171c;
-    --panel: #20242c;
-    --panel-strong: #292e38;
-    --text: #f4f6f8;
-    --muted: #a9b0bd;
-    --line: #3a404b;
-    --accent: #ff7a4d;
-    --accent-dark: #ff916d;
-    --gold: #ffd166;
-    --blue: #7fa5ff;
-    --green: #62d29d;
-    --lotto-yellow: #ffd43b;
-    --lotto-blue: #78a7ff;
-    --lotto-red: #ff7676;
-    --lotto-gray: #aeb7c4;
-    --lotto-green: #69d384;
-    --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+    --bg: #14181b;
+    --panel: #1e2428;
+    --panel-strong: #283037;
+    --text: #f5f7f8;
+    --muted: #a9b1bb;
+    --line: #39424a;
+    --accent: #63c9b9;
+    --accent-dark: #8ce3d6;
+    --warm: #f4c978;
+    --rose: #ff8a98;
+    --blue: #7ea7ff;
+    --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
 }
 
 * {
@@ -49,20 +39,13 @@ body {
     margin: 0;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background:
-        radial-gradient(circle at 20% 18%, rgba(244, 182, 63, 0.24), transparent 28%),
-        radial-gradient(circle at 80% 12%, rgba(52, 102, 214, 0.16), transparent 26%),
+        radial-gradient(circle at 14% 18%, color-mix(in srgb, var(--warm) 28%, transparent), transparent 30%),
+        radial-gradient(circle at 86% 8%, color-mix(in srgb, var(--blue) 18%, transparent), transparent 28%),
         var(--bg);
     color: var(--text);
-    transition: background-color 180ms ease, color 180ms ease;
 }
 
 button {
-    font: inherit;
-}
-
-input,
-select,
-textarea {
     font: inherit;
 }
 
@@ -73,527 +56,280 @@ textarea {
     padding: 32px 18px;
 }
 
-.lotto-panel {
-    width: min(720px, 100%);
+.tester-panel {
+    width: min(1040px, 100%);
     padding: 28px;
     border: 1px solid var(--line);
     border-radius: 24px;
-    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    background: color-mix(in srgb, var(--panel) 93%, transparent);
     box-shadow: var(--shadow);
 }
 
-.topbar,
-.ticket-header,
-.bonus-row {
-    display: flex;
-    align-items: center;
-}
-
 .topbar {
+    display: flex;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 26px;
+    gap: 18px;
+    margin-bottom: 28px;
 }
 
 .eyebrow {
     margin: 0 0 6px;
     color: var(--accent);
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: 0;
     text-transform: uppercase;
 }
 
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+
 h1 {
-    margin: 0;
-    font-size: clamp(38px, 7vw, 64px);
-    line-height: 1;
+    margin-bottom: 0;
+    font-size: clamp(40px, 7vw, 76px);
+    line-height: 0.95;
 }
 
 .theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 104px;
+    min-width: 72px;
     min-height: 42px;
-    padding: 0 14px;
     border: 1px solid var(--line);
     border-radius: 999px;
     background: var(--panel-strong);
     color: var(--text);
+    font-weight: 900;
     cursor: pointer;
 }
 
-.toggle-icon {
+.test-layout {
     display: grid;
-    width: 24px;
-    height: 24px;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--gold);
-    color: #1d1b16;
-    font-size: 14px;
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    gap: 18px;
 }
 
-.controls {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 16px;
-}
-
-.switch-control {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 42px;
-    padding: 6px 8px 6px 14px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--panel-strong);
-    color: var(--text);
-    cursor: pointer;
-    user-select: none;
-}
-
-.switch-text {
-    font-size: 14px;
-    font-weight: 800;
-}
-
-.switch-control input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-}
-
-.switch-track {
-    display: inline-flex;
-    align-items: center;
-    width: 48px;
-    height: 28px;
-    padding: 3px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--line) 76%, var(--panel-strong));
-    transition: background-color 180ms ease;
-}
-
-.switch-thumb {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--panel-strong);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 180ms ease;
-}
-
-.switch-control input:checked + .switch-track {
-    background: var(--accent);
-}
-
-.switch-control input:checked + .switch-track .switch-thumb {
-    transform: translateX(20px);
-}
-
-.tickets {
-    display: grid;
-    gap: 14px;
-}
-
-.ticket {
-    position: relative;
-    overflow: hidden;
-    padding: 22px;
+.camera-card,
+.result-card {
     border: 1px solid var(--line);
     border-radius: 18px;
+    background: var(--panel-strong);
+}
+
+.camera-card {
+    display: grid;
+    gap: 16px;
+    padding: 18px;
+}
+
+.camera-frame {
+    position: relative;
+    display: grid;
+    min-height: 420px;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 16px;
     background:
-        linear-gradient(135deg, color-mix(in srgb, var(--panel-strong) 86%, var(--gold)), var(--panel-strong)),
-        var(--panel-strong);
+        linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, transparent), transparent),
+        color-mix(in srgb, var(--panel) 74%, var(--line));
 }
 
-.ticket.compact {
+.camera-placeholder {
     display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-}
-
-.ticket.compact::before,
-.ticket.compact::after {
-    display: none;
-}
-
-.ticket::before,
-.ticket::after {
-    position: absolute;
-    top: 50%;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--panel);
-    content: "";
-    transform: translateY(-50%);
-}
-
-.ticket::before {
-    left: -17px;
-}
-
-.ticket::after {
-    right: -17px;
-}
-
-.ticket-header {
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.ticket.compact .ticket-header {
-    margin-bottom: 10px;
-}
-
-.ticket-mark {
-    padding: 7px 10px;
-    border-radius: 8px;
-    background: var(--text);
-    color: var(--panel);
-    font-weight: 900;
-}
-
-.ticket-date {
-    color: var(--muted);
-    font-size: 14px;
-    white-space: nowrap;
-}
-
-.game-label {
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 800;
-}
-
-.ticket.compact .game-label {
-    flex: 0 0 auto;
-    min-width: 40px;
-    font-size: 13px;
-}
-
-.number-line {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-width: 0;
-}
-
-.balls {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(54px, 1fr));
-    gap: 12px;
-}
-
-.ticket.compact .balls {
-    grid-template-columns: repeat(6, 34px);
-    justify-content: center;
-    gap: 5px;
-}
-
-.ball,
-.bonus-ball {
-    display: grid;
+    width: min(280px, 80%);
     aspect-ratio: 1;
     place-items: center;
+    border: 2px dashed color-mix(in srgb, var(--accent) 44%, var(--line));
     border-radius: 50%;
-    color: #111318;
-    font-size: clamp(22px, 5vw, 34px);
-    font-weight: 900;
-    box-shadow: inset 0 -8px 16px rgba(0, 0, 0, 0.16), 0 10px 20px rgba(0, 0, 0, 0.12);
-}
-
-.ticket.compact .ball {
-    width: 34px;
-    height: 34px;
-    font-size: 15px;
-    box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.14), 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.ball-yellow {
-    background: var(--lotto-yellow);
-    color: #1f1a05;
-}
-
-.ball-blue {
-    background: var(--lotto-blue);
-    color: white;
-}
-
-.ball-red {
-    background: var(--lotto-red);
-    color: white;
-}
-
-.ball-gray {
-    background: var(--lotto-gray);
-    color: white;
-}
-
-.ball-green {
-    background: var(--lotto-green);
-    color: #092513;
-}
-
-.bonus-ball.ball-yellow {
-    background: var(--lotto-yellow);
-    color: #1f1a05;
-}
-
-.bonus-ball.ball-blue {
-    background: var(--lotto-blue);
-    color: white;
-}
-
-.bonus-ball.ball-red {
-    background: var(--lotto-red);
-    color: white;
-}
-
-.bonus-ball.ball-gray {
-    background: var(--lotto-gray);
-    color: white;
-}
-
-.bonus-ball.ball-green {
-    background: var(--lotto-green);
-    color: #092513;
-}
-
-.ball.placeholder,
-.bonus-ball {
-    background: color-mix(in srgb, var(--line) 72%, var(--panel-strong));
     color: var(--muted);
 }
 
-.bonus-row {
-    justify-content: center;
-    gap: 12px;
-    margin-top: 22px;
+.placeholder-mark {
+    font-size: clamp(36px, 9vw, 72px);
+    font-weight: 1000;
+    color: color-mix(in srgb, var(--text) 18%, transparent);
 }
 
-.ticket.compact .bonus-row {
-    gap: 8px;
-    margin-top: 10px;
+.webcam-canvas {
+    width: min(100%, 420px);
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
 }
 
-.plus {
-    color: var(--muted);
-    font-size: 28px;
-    font-weight: 800;
+.action-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
 }
 
-.ticket.compact .plus {
-    font-size: 18px;
-    line-height: 1;
-}
-
-.bonus-ball {
-    width: 70px;
-    height: 70px;
-}
-
-.ticket.compact .bonus-ball {
-    flex: 0 0 auto;
-    width: 34px;
-    height: 34px;
-    font-size: 15px;
-    box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.14), 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.generate-button {
-    width: 100%;
-    min-height: 58px;
-    margin-top: 22px;
-    border: 0;
+.primary-button,
+.secondary-button {
+    min-height: 54px;
     border-radius: 14px;
-    background: var(--accent);
-    color: white;
-    font-size: 18px;
     font-weight: 900;
     cursor: pointer;
-    box-shadow: 0 14px 26px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
-.generate-button:hover {
+.primary-button {
+    border: 0;
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 14px 24px color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.primary-button:hover {
     background: var(--accent-dark);
 }
 
-.comments-section,
-.contact-form {
-    display: grid;
-    gap: 14px;
-    margin-top: 28px;
-    padding-top: 24px;
-    border-top: 1px solid var(--line);
+.secondary-button {
+    min-width: 96px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
 }
 
-.comments-section {
-    min-height: 220px;
+.primary-button:disabled,
+.secondary-button:disabled {
+    cursor: wait;
+    opacity: 0.55;
 }
 
-#disqus_thread {
-    min-height: 180px;
-}
-
-.comments-section noscript {
+.status-text {
+    min-height: 22px;
+    margin: 0;
     color: var(--muted);
     font-size: 14px;
-}
-
-.comments-section a {
-    color: var(--accent);
-}
-
-.form-heading {
-    display: grid;
-    gap: 4px;
-}
-
-.form-heading h2 {
-    margin: 0;
-    font-size: 22px;
-    line-height: 1.25;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.contact-form label {
-    display: grid;
-    gap: 7px;
-}
-
-.contact-form label span {
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.contact-form input,
-.contact-form select,
-.contact-form textarea {
-    width: 100%;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--panel-strong);
-    color: var(--text);
-    outline: none;
-}
-
-.contact-form input,
-.contact-form select {
-    min-height: 46px;
-    padding: 0 12px;
-}
-
-.contact-form textarea {
-    min-height: 108px;
-    padding: 12px;
-    resize: vertical;
-}
-
-.contact-form input:focus,
-.contact-form select:focus,
-.contact-form textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-.submit-button {
-    min-height: 50px;
-    border: 1px solid var(--accent);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--accent);
-    font-weight: 900;
-    cursor: pointer;
-}
-
-.submit-button:hover {
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.submit-button:disabled {
-    cursor: wait;
-    opacity: 0.64;
-}
-
-.form-status {
-    min-height: 20px;
-    margin: 0;
-    color: var(--muted);
-    font-size: 13px;
     font-weight: 700;
 }
 
-@media (max-width: 620px) {
-    .lotto-panel {
+.result-card {
+    display: grid;
+    align-content: start;
+    gap: 18px;
+    padding: 18px;
+}
+
+.result-hero {
+    display: grid;
+    gap: 12px;
+    min-height: 220px;
+    place-items: center;
+    padding: 28px 18px;
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--warm) 34%, transparent), transparent 34%),
+        linear-gradient(145deg, color-mix(in srgb, var(--accent) 14%, var(--panel-strong)), var(--panel-strong));
+    text-align: center;
+}
+
+.result-label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.result-hero h2 {
+    margin: 0;
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1;
+}
+
+.result-caption {
+    max-width: 280px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.score-ring {
+    display: grid;
+    width: 92px;
+    height: 92px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--text);
+    color: var(--panel);
+    font-size: 24px;
+    font-weight: 1000;
+}
+
+.prediction-list {
+    display: grid;
+    gap: 10px;
+}
+
+.empty-state {
+    padding: 18px;
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: center;
+}
+
+.prediction-item {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--panel) 72%, transparent);
+}
+
+.prediction-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 900;
+}
+
+.prediction-meta strong {
+    color: var(--accent);
+}
+
+.meter {
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 74%, transparent);
+}
+
+.meter span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--warm), var(--rose));
+    transition: width 160ms ease;
+}
+
+@media (max-width: 820px) {
+    .tester-panel {
         padding: 20px;
         border-radius: 18px;
     }
 
     .topbar {
-        align-items: flex-start;
+        align-items: stretch;
+        flex-direction: column;
     }
 
-    .controls {
-        justify-content: stretch;
-    }
-
-    .switch-control {
+    .theme-toggle {
         width: 100%;
-        justify-content: space-between;
     }
 
-    .form-grid {
+    .test-layout {
         grid-template-columns: 1fr;
     }
 
-    .balls {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .ticket.compact .balls {
-        grid-template-columns: repeat(6, 28px);
-        gap: 4px;
-    }
-
-    .ticket.compact .ball,
-    .ticket.compact .bonus-ball {
-        width: 28px;
-        height: 28px;
-        font-size: 13px;
-    }
-
-    .ticket.compact {
-        grid-template-columns: 32px minmax(0, 1fr);
-        gap: 6px;
-        padding: 7px 9px;
-    }
-
-    .ticket.compact .game-label {
-        min-width: 34px;
-        font-size: 12px;
-    }
-
-    .number-line {
-        gap: 4px;
-    }
-
-    .ticket.compact .plus {
-        font-size: 15px;
+    .camera-frame {
+        min-height: 320px;
     }
 }

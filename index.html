@@ -3,104 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotto Pick</title>
+    <title>동물상 테스트</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
     <main class="app-shell">
-        <section class="lotto-panel" aria-labelledby="pageTitle">
+        <section class="tester-panel" aria-labelledby="pageTitle">
             <header class="topbar">
                 <div>
-                    <p class="eyebrow">Lucky Draw</p>
-                    <h1 id="pageTitle">Lotto Pick</h1>
+                    <p class="eyebrow">Animal Face</p>
+                    <h1 id="pageTitle">동물상 테스트</h1>
                 </div>
                 <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크 모드로 전환">
-                    <span class="toggle-icon" aria-hidden="true">☀</span>
-                    <span id="themeLabel">Light</span>
+                    <span class="toggle-icon" aria-hidden="true">Light</span>
                 </button>
             </header>
 
-            <div class="controls">
-                <label class="switch-control" for="multiGameToggle">
-                    <span class="switch-text">5게임 한번에</span>
-                    <input id="multiGameToggle" type="checkbox">
-                    <span class="switch-track" aria-hidden="true">
-                        <span class="switch-thumb"></span>
-                    </span>
-                </label>
+            <div class="test-layout">
+                <section class="camera-card" aria-label="카메라 분석">
+                    <div class="camera-frame" id="webcam-container">
+                        <div class="camera-placeholder" id="cameraPlaceholder">
+                            <span class="placeholder-mark">FACE</span>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="primary-button" id="startBtn" type="button">테스트 시작</button>
+                        <button class="secondary-button" id="stopBtn" type="button" disabled>정지</button>
+                    </div>
+
+                    <p class="status-text" id="statusText" aria-live="polite">모델을 불러올 준비가 되었습니다.</p>
+                </section>
+
+                <section class="result-card" aria-label="분석 결과">
+                    <div class="result-hero">
+                        <p class="result-label">현재 결과</p>
+                        <h2 id="topAnimal">대기 중</h2>
+                        <p class="result-caption" id="resultCaption">카메라를 켜면 가장 가까운 동물상이 표시됩니다.</p>
+                        <div class="score-ring" id="topScore">0%</div>
+                    </div>
+
+                    <div class="prediction-list" id="label-container" aria-live="polite">
+                        <div class="empty-state">Start Test를 누르면 동물상 분석 결과가 표시됩니다.</div>
+                    </div>
+                </section>
             </div>
-
-            <div class="tickets" id="tickets" aria-live="polite"></div>
-
-            <button id="generateBtn" class="generate-button" type="button">번호 뽑기</button>
-
-            <section class="comments-section" aria-labelledby="commentsTitle">
-                <div class="form-heading">
-                    <p class="eyebrow">Comments</p>
-                    <h2 id="commentsTitle">당첨 소식 나누기</h2>
-                </div>
-                <div id="disqus_thread"></div>
-                <script>
-                    /**
-                    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-                    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-                    */
-                    var disqus_config = function () {
-                        this.page.url = window.location.href.split('#')[0];
-                        this.page.identifier = 'lotto-pick-comments';
-                    };
-
-                    (function() { // DON'T EDIT BELOW THIS LINE
-                        var d = document, s = d.createElement('script');
-                        s.src = 'https://test-site-wfuvobj7s9.disqus.com/embed.js';
-                        s.setAttribute('data-timestamp', +new Date());
-                        (d.head || d.body).appendChild(s);
-                    })();
-                </script>
-                <noscript>
-                    Please enable JavaScript to view the
-                    <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
-                </noscript>
-            </section>
-
-            <form class="contact-form" id="contactForm" action="https://formspree.io/f/maqvaevg" method="POST">
-                <div class="form-heading">
-                    <p class="eyebrow">Contact</p>
-                    <h2>당첨 소식 자랑 및 기부 문의</h2>
-                </div>
-
-                <div class="form-grid">
-                    <label>
-                        <span>이름</span>
-                        <input type="text" name="name" autocomplete="name" required>
-                    </label>
-
-                    <label>
-                        <span>이메일</span>
-                        <input type="email" name="email" autocomplete="email" required>
-                    </label>
-                </div>
-
-                <label>
-                    <span>문의 유형</span>
-                    <select name="topic" required>
-                        <option value="당첨 소식 자랑">당첨 소식 자랑</option>
-                        <option value="기부 문의">기부 문의</option>
-                        <option value="기타 문의">기타 문의</option>
-                    </select>
-                </label>
-
-                <label>
-                    <span>내용</span>
-                    <textarea name="message" rows="4" placeholder="당첨 후기나 기부 관련 문의를 남겨주세요." required></textarea>
-                </label>
-
-                <input type="hidden" name="_subject" value="Lotto Pick 문의">
-                <button class="submit-button" type="submit">문의 보내기</button>
-                <p class="form-status" id="formStatus" aria-live="polite"></p>
-            </form>
         </section>
     </main>
+
     <script src="script.js"></script>
 </body>
 </html>

@@ -153,13 +153,14 @@ h1 {
 
 .site-summary {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
-    margin-bottom: 24px;
+    margin-top: 24px;
 }
 
 .site-summary article,
-.content-notes {
+.content-notes,
+.site-footer {
     border: 1px solid var(--line);
     border-radius: 16px;
     background: color-mix(in srgb, var(--panel-strong) 78%, transparent);
@@ -170,14 +171,16 @@ h1 {
 }
 
 .site-summary h2,
-.content-notes h2 {
+.content-notes h2,
+.site-footer h2 {
     margin-bottom: 8px;
     font-size: 17px;
     line-height: 1.25;
 }
 
 .site-summary p,
-.content-notes p {
+.content-notes p,
+.site-footer p {
     margin-bottom: 0;
     color: var(--muted);
     font-size: 14px;
@@ -686,19 +689,81 @@ h1 {
     gap: 12px;
 }
 
+.faq-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.faq-list details {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel-strong);
+}
+
+.faq-list summary {
+    cursor: pointer;
+    padding: 13px 14px;
+    color: var(--text);
+    font-weight: 900;
+}
+
+.faq-list details p {
+    padding: 0 14px 14px;
+}
+
+.site-footer {
+    margin-top: 16px;
+    padding: 16px;
+}
+
 @media (max-width: 820px) {
+    .app-shell {
+        padding: 12px;
+    }
+
     .sandbox-panel {
-        padding: 20px;
-        border-radius: 18px;
+        padding: 14px;
+        border-radius: 16px;
     }
 
     .topbar {
         align-items: stretch;
         flex-direction: column;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    h1 {
+        font-size: clamp(30px, 10vw, 44px);
+    }
+
+    .eyebrow {
+        margin-bottom: 4px;
+        font-size: 12px;
     }
 
     .theme-toggle {
         width: 100%;
+        min-height: 38px;
+    }
+
+    .feature-nav {
+        gap: 6px;
+        margin-bottom: 14px;
+        padding: 6px;
+    }
+
+    .nav-button {
+        min-height: 42px;
+    }
+
+    .feature-heading {
+        margin-bottom: 12px;
+    }
+
+    .feature-heading h2 {
+        font-size: clamp(24px, 8vw, 34px);
     }
 
     .feature-nav,
@@ -706,6 +771,41 @@ h1 {
     .note-grid,
     .test-layout {
         grid-template-columns: 1fr;
+    }
+
+    .site-summary {
+        margin-top: 18px;
+    }
+
+    .site-summary article,
+    .content-notes,
+    .site-footer {
+        padding: 12px;
+    }
+
+    .site-summary h2,
+    .content-notes h2 {
+        font-size: 15px;
+    }
+
+    .site-summary p,
+    .content-notes p,
+    .site-footer p {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .content-notes {
+        margin-top: 14px;
+    }
+
+    .faq-list summary {
+        padding: 11px 12px;
+        font-size: 13px;
+    }
+
+    .faq-list details p {
+        padding: 0 12px 12px;
     }
 
     .controls {

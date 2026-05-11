@@ -122,7 +122,7 @@ h1 {
 
 .feature-nav {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
     margin-bottom: 22px;
     padding: 8px;
@@ -708,6 +708,97 @@ h1 {
     gap: 10px;
 }
 
+.history-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.history-card,
+.history-side {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--panel-strong);
+}
+
+.history-card {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    gap: 14px;
+    min-height: 360px;
+    align-content: center;
+    padding: 30px;
+    background:
+        radial-gradient(circle at 80% 16%, color-mix(in srgb, var(--warm) 34%, transparent), transparent 28%),
+        linear-gradient(145deg, color-mix(in srgb, var(--accent) 12%, var(--panel-strong)), var(--panel-strong));
+}
+
+.history-date {
+    width: fit-content;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--panel);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.history-year {
+    color: var(--accent);
+    font-size: clamp(54px, 10vw, 108px);
+    line-height: 0.9;
+    font-weight: 1000;
+}
+
+.history-card h3 {
+    max-width: 680px;
+    margin: 0;
+    font-size: clamp(28px, 5vw, 48px);
+    line-height: 1.05;
+}
+
+.history-card p {
+    max-width: 700px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 17px;
+    font-weight: 750;
+    line-height: 1.55;
+}
+
+.history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.history-meta span {
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel) 72%, transparent);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.history-side {
+    display: grid;
+    align-content: center;
+    gap: 12px;
+    padding: 18px;
+}
+
+.history-side p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.5;
+}
+
 .empty-state {
     padding: 18px;
     border: 1px dashed var(--line);
@@ -831,6 +922,7 @@ h1 {
 
     .nav-button {
         min-height: 42px;
+        font-size: 13px;
     }
 
     .feature-heading {
@@ -844,7 +936,8 @@ h1 {
     .feature-nav,
     .site-summary,
     .note-grid,
-    .test-layout {
+    .test-layout,
+    .history-layout {
         grid-template-columns: 1fr;
     }
 
@@ -933,5 +1026,14 @@ h1 {
 
     .secondary-button {
         width: 100%;
+    }
+
+    .history-card {
+        min-height: 300px;
+        padding: 20px;
+    }
+
+    .history-card p {
+        font-size: 15px;
     }
 }

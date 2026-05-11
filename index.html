@@ -24,6 +24,7 @@
             <nav class="feature-nav" aria-label="테스트 기능">
                 <button class="nav-button active" type="button" data-target="lottoView">Lotto Pick</button>
                 <button class="nav-button" type="button" data-target="animalView">Animal Face</button>
+                <button class="nav-button" type="button" data-target="historyView">Random History</button>
             </nav>
 
             <section class="feature-view active" id="lottoView" aria-labelledby="lottoTitle">
@@ -101,10 +102,37 @@
                 </div>
             </section>
 
+            <section class="feature-view" id="historyView" aria-labelledby="historyTitle">
+                <div class="feature-heading">
+                    <p class="eyebrow">Today in History</p>
+                    <h2 id="historyTitle">오늘의 랜덤 역사</h2>
+                </div>
+
+                <div class="history-layout">
+                    <section class="history-card" aria-live="polite">
+                        <div class="history-date" id="historyDate">오늘</div>
+                        <div class="history-year" id="historyYear">----</div>
+                        <h3 id="historyEventTitle">역사 이벤트를 준비 중입니다</h3>
+                        <p id="historyEventCopy">버튼을 누르면 오늘 날짜에 있었던 역사적 사건 중 하나를 랜덤으로 보여줍니다.</p>
+                        <div class="history-meta">
+                            <span id="historyCategory">History</span>
+                            <span id="historyIndex">0 / 0</span>
+                        </div>
+                    </section>
+
+                    <aside class="history-side" aria-label="오늘의 역사 안내">
+                        <p>오늘 날짜와 같은 월, 일에 있었던 사건을 랜덤으로 뽑습니다.</p>
+                        <p>자료가 없는 날짜에는 전체 역사 카드 중 하나를 보여줍니다.</p>
+                    </aside>
+                </div>
+
+                <button id="historyBtn" class="primary-button" type="button">랜덤 역사 뽑기</button>
+            </section>
+
             <section class="site-summary" aria-label="사이트 소개">
                 <article>
                     <h2>무엇을 할 수 있나요?</h2>
-                    <p>Jerry's Test Sandbox는 로또 번호 생성기와 Teachable Machine 동물상 테스트를 한 화면에서 전환해 사용하는 실험형 도구입니다.</p>
+                    <p>Jerry's Test Sandbox는 로또 번호 생성기, 동물상 테스트, 오늘의 랜덤 역사를 한 화면에서 전환해 사용하는 실험형 도구입니다.</p>
                 </article>
                 <article>
                     <h2>로또 기능 원리</h2>
@@ -115,8 +143,8 @@
                     <p>제공된 이미지 모델은 강아지, 고양이, 사슴, 공룡 라벨 중 가장 가까운 결과를 확률로 보여줍니다. 결과는 재미용 참고값입니다.</p>
                 </article>
                 <article>
-                    <h2>개인정보 안내</h2>
-                    <p>카메라 화면과 업로드 이미지는 브라우저에서 분석용으로만 사용됩니다. 이 사이트는 사진 파일이나 카메라 영상을 서버에 저장하지 않습니다.</p>
+                    <h2>랜덤 역사 방식</h2>
+                    <p>방문한 날의 월, 일과 같은 날짜에 있었던 역사적 사건을 후보로 두고, 버튼을 누를 때마다 하나씩 무작위로 보여줍니다.</p>
                 </article>
             </section>
 

@@ -16,31 +16,21 @@
                 </div>
                 <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크 모드로 전환">
                     <span class="toggle-icon" aria-hidden="true">☀</span>
-                    <span id="themeLabel">White</span>
+                    <span id="themeLabel">Light</span>
                 </button>
             </header>
 
-            <div class="ticket">
-                <div class="ticket-header">
-                    <span class="ticket-mark">LOTTO</span>
-                    <span class="ticket-date" id="drawDate"></span>
-                </div>
-
-                <div class="balls" id="mainNumbers" aria-live="polite">
-                    <span class="ball placeholder">?</span>
-                    <span class="ball placeholder">?</span>
-                    <span class="ball placeholder">?</span>
-                    <span class="ball placeholder">?</span>
-                    <span class="ball placeholder">?</span>
-                    <span class="ball placeholder">?</span>
-                </div>
-
-                <div class="bonus-row">
-                    <span class="plus">+</span>
-                    <div class="bonus-ball" id="bonusNumber">?</div>
-                    <span class="bonus-label">Bonus</span>
-                </div>
+            <div class="controls">
+                <label class="switch-control" for="multiGameToggle">
+                    <span class="switch-text">5게임 한번에</span>
+                    <input id="multiGameToggle" type="checkbox">
+                    <span class="switch-track" aria-hidden="true">
+                        <span class="switch-thumb"></span>
+                    </span>
+                </label>
             </div>
+
+            <div class="tickets" id="tickets" aria-live="polite"></div>
 
             <button id="generateBtn" class="generate-button" type="button">번호 뽑기</button>
         </section>

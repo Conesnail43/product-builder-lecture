@@ -15,44 +15,115 @@ function generateLottoNumbers() {
 
 const body = document.body;
 const generateBtn = document.getElementById('generateBtn');
-const mainNumbersEl = document.getElementById('mainNumbers');
-const bonusNumberEl = document.getElementById('bonusNumber');
+const ticketsEl = document.getElementById('tickets');
+const multiGameToggle = document.getElementById('multiGameToggle');
 const themeToggle = document.getElementById('themeToggle');
 const themeLabel = document.getElementById('themeLabel');
 const toggleIcon = document.querySelector('.toggle-icon');
-const drawDate = document.getElementById('drawDate');
+const formattedDate = new Intl.DateTimeFormat('ko-KR', {
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short'
+}).format(new Date());
 
-function renderNumbers(mainNumbers, bonusNumber) {
-    mainNumbersEl.innerHTML = mainNumbers
-        .map((number) => `<span class="ball">${number}</span>`)
+function getBallColorClass(number) {
+    if (number <= 10) return 'ball-yellow';
+    if (number <= 20) return 'ball-blue';
+    if (number <= 30) return 'ball-red';
+    if (number <= 40) return 'ball-gray';
+    return 'ball-green';
+}
+
+function createBall(number, extraClass = '') {
+    return `<span class="ball ${getBallColorClass(number)} ${extraClass}">${number}</span>`;
+}
+
+function renderTicket(game, index, isCompact) {
+    const mainBalls = game.mainNumbers
+        .map((number) => createBall(number))
         .join('');
-    bonusNumberEl.textContent = bonusNumber;
-    bonusNumberEl.classList.add('active');
+    const bonusClass = getBallColorClass(game.bonusNumber);
+
+    return `
+        <div class="ticket ${isCompact ? 'compact' : ''}">
+            <div class="ticket-header">
+                <span class="ticket-mark">LOTTO</span>
+                <span class="game-label">${index + 1}게임</span>
+                <span class="ticket-date">${formattedDate}</span>
+            </div>
+
+            <div class="balls">
+                ${mainBalls}
+            </div>
+
+            <div class="bonus-row">
+                <span class="plus">+</span>
+                <div class="bonus-ball active ${bonusClass}">${game.bonusNumber}</div>
+                <span class="bonus-label">Bonus</span>
+            </div>
+        </div>
+    `;
+}
+
+function renderPlaceholderTicket() {
+    return `
+        <div class="ticket">
+            <div class="ticket-header">
+                <span class="ticket-mark">LOTTO</span>
+                <span class="ticket-date">${formattedDate}</span>
+            </div>
+
+            <div class="balls">
+                <span class="ball placeholder">?</span>
+                <span class="ball placeholder">?</span>
+                <span class="ball placeholder">?</span>
+                <span class="ball placeholder">?</span>
+                <span class="ball placeholder">?</span>
+                <span class="ball placeholder">?</span>
+            </div>
+
+            <div class="bonus-row">
+                <span class="plus">+</span>
+                <div class="bonus-ball">?</div>
+                <span class="bonus-label">Bonus</span>
+            </div>
+        </div>
+    `;
+}
+
+function renderGames(games) {
+    const isCompact = games.length > 1;
+    ticketsEl.innerHTML = games
+        .map((game, index) => renderTicket(game, index, isCompact))
+        .join('');
 }
 
 function setTheme(theme) {
     const isDark = theme === 'dark';
     body.classList.toggle('dark', isDark);
-    themeLabel.textContent = isDark ? 'Dark' : 'White';
+    themeLabel.textContent = isDark ? 'Dark' : 'Light';
     toggleIcon.textContent = isDark ? '☾' : '☀';
     themeToggle.setAttribute('aria-label', isDark ? '라이트 모드로 전환' : '다크 모드로 전환');
     localStorage.setItem('lotto-theme', theme);
 }
 
+function updateGenerateButtonText() {
+    generateBtn.textContent = multiGameToggle.checked ? '5게임 뽑기' : '번호 뽑기';
+}
+
 generateBtn.addEventListener('click', function() {
-    const { mainNumbers, bonusNumber } = generateLottoNumbers();
-    renderNumbers(mainNumbers, bonusNumber);
+    const gameCount = multiGameToggle.checked ? 5 : 1;
+    const games = Array.from({ length: gameCount }, generateLottoNumbers);
+    renderGames(games);
 });
+
+multiGameToggle.addEventListener('change', updateGenerateButtonText);
 
 themeToggle.addEventListener('click', function() {
     const nextTheme = body.classList.contains('dark') ? 'light' : 'dark';
     setTheme(nextTheme);
 });
 
-drawDate.textContent = new Intl.DateTimeFormat('ko-KR', {
-    month: 'short',
-    day: 'numeric',
-    weekday: 'short'
-}).format(new Date());
-
 setTheme(localStorage.getItem('lotto-theme') || 'light');
+updateGenerateButtonText();
+ticketsEl.innerHTML = renderPlaceholderTicket();

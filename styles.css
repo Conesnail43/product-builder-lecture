@@ -11,6 +11,11 @@
     --gold: #f4b63f;
     --blue: #3466d6;
     --green: #2f9b6c;
+    --lotto-yellow: #fbc400;
+    --lotto-blue: #5f8ee4;
+    --lotto-red: #f05b5b;
+    --lotto-gray: #8f98a3;
+    --lotto-green: #57b96f;
     --shadow: 0 24px 60px rgba(82, 67, 43, 0.18);
 }
 
@@ -27,6 +32,11 @@ body.dark {
     --gold: #ffd166;
     --blue: #7fa5ff;
     --green: #62d29d;
+    --lotto-yellow: #ffd43b;
+    --lotto-blue: #78a7ff;
+    --lotto-red: #ff7676;
+    --lotto-gray: #aeb7c4;
+    --lotto-green: #69d384;
     --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
 }
 
@@ -119,6 +129,71 @@ h1 {
     font-size: 14px;
 }
 
+.controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.switch-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 6px 8px 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel-strong);
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch-text {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.switch-control input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.switch-track {
+    display: inline-flex;
+    align-items: center;
+    width: 48px;
+    height: 28px;
+    padding: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 76%, var(--panel-strong));
+    transition: background-color 180ms ease;
+}
+
+.switch-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--panel-strong);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 180ms ease;
+}
+
+.switch-control input:checked + .switch-track {
+    background: var(--accent);
+}
+
+.switch-control input:checked + .switch-track .switch-thumb {
+    transform: translateX(20px);
+}
+
+.tickets {
+    display: grid;
+    gap: 14px;
+}
+
 .ticket {
     position: relative;
     overflow: hidden;
@@ -128,6 +203,10 @@ h1 {
     background:
         linear-gradient(135deg, color-mix(in srgb, var(--panel-strong) 86%, var(--gold)), var(--panel-strong)),
         var(--panel-strong);
+}
+
+.ticket.compact {
+    padding: 18px;
 }
 
 .ticket::before,
@@ -170,6 +249,12 @@ h1 {
     white-space: nowrap;
 }
 
+.game-label {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 800;
+}
+
 .balls {
     display: grid;
     grid-template-columns: repeat(6, minmax(54px, 1fr));
@@ -188,24 +273,58 @@ h1 {
     box-shadow: inset 0 -8px 16px rgba(0, 0, 0, 0.16), 0 10px 20px rgba(0, 0, 0, 0.12);
 }
 
-.ball:nth-child(1),
-.ball:nth-child(6) {
-    background: var(--gold);
+.ticket.compact .ball {
+    font-size: clamp(18px, 4vw, 28px);
 }
 
-.ball:nth-child(2),
-.ball:nth-child(5) {
-    background: #ff8a65;
+.ball-yellow {
+    background: var(--lotto-yellow);
+    color: #1f1a05;
 }
 
-.ball:nth-child(3) {
-    background: var(--blue);
+.ball-blue {
+    background: var(--lotto-blue);
     color: white;
 }
 
-.ball:nth-child(4) {
-    background: var(--green);
+.ball-red {
+    background: var(--lotto-red);
     color: white;
+}
+
+.ball-gray {
+    background: var(--lotto-gray);
+    color: white;
+}
+
+.ball-green {
+    background: var(--lotto-green);
+    color: #092513;
+}
+
+.bonus-ball.ball-yellow {
+    background: var(--lotto-yellow);
+    color: #1f1a05;
+}
+
+.bonus-ball.ball-blue {
+    background: var(--lotto-blue);
+    color: white;
+}
+
+.bonus-ball.ball-red {
+    background: var(--lotto-red);
+    color: white;
+}
+
+.bonus-ball.ball-gray {
+    background: var(--lotto-gray);
+    color: white;
+}
+
+.bonus-ball.ball-green {
+    background: var(--lotto-green);
+    color: #092513;
 }
 
 .ball.placeholder,
@@ -231,9 +350,10 @@ h1 {
     height: 70px;
 }
 
-.bonus-ball.active {
-    background: #d9b8ff;
-    color: #25113c;
+.ticket.compact .bonus-ball {
+    width: 58px;
+    height: 58px;
+    font-size: 24px;
 }
 
 .bonus-label {
@@ -267,6 +387,15 @@ h1 {
 
     .topbar {
         align-items: flex-start;
+    }
+
+    .controls {
+        justify-content: stretch;
+    }
+
+    .switch-control {
+        width: 100%;
+        justify-content: space-between;
     }
 
     .balls {

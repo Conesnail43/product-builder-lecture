@@ -450,6 +450,14 @@ h1 {
     font-size: 14px;
 }
 
+.disqus-status {
+    min-height: 20px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .comments-section a {
     color: var(--accent);
 }

@@ -20,6 +20,8 @@ const multiGameToggle = document.getElementById('multiGameToggle');
 const themeToggle = document.getElementById('themeToggle');
 const themeLabel = document.getElementById('themeLabel');
 const toggleIcon = document.querySelector('.toggle-icon');
+const contactForm = document.getElementById('contactForm');
+const formStatus = document.getElementById('formStatus');
 const formattedDate = new Intl.DateTimeFormat('ko-KR', {
     month: 'short',
     day: 'numeric',
@@ -135,6 +137,37 @@ multiGameToggle.addEventListener('change', updateGenerateButtonText);
 themeToggle.addEventListener('click', function() {
     const nextTheme = body.classList.contains('dark') ? 'light' : 'dark';
     setTheme(nextTheme);
+});
+
+contactForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const submitButton = contactForm.querySelector('button[type="submit"]');
+    const formData = new FormData(contactForm);
+
+    submitButton.disabled = true;
+    formStatus.textContent = '전송 중입니다...';
+
+    try {
+        const response = await fetch(contactForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                Accept: 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Form submission failed');
+        }
+
+        contactForm.reset();
+        formStatus.textContent = '문의가 전송되었습니다.';
+    } catch (error) {
+        formStatus.textContent = '전송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+    } finally {
+        submitButton.disabled = false;
+    }
 });
 
 setTheme(localStorage.getItem('lotto-theme') || 'light');

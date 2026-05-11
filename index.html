@@ -33,6 +33,43 @@
             <div class="tickets" id="tickets" aria-live="polite"></div>
 
             <button id="generateBtn" class="generate-button" type="button">번호 뽑기</button>
+
+            <form class="contact-form" id="contactForm" action="https://formspree.io/f/maqvaevg" method="POST">
+                <div class="form-heading">
+                    <p class="eyebrow">Contact</p>
+                    <h2>당첨 소식 자랑 및 기부 문의</h2>
+                </div>
+
+                <div class="form-grid">
+                    <label>
+                        <span>이름</span>
+                        <input type="text" name="name" autocomplete="name" required>
+                    </label>
+
+                    <label>
+                        <span>이메일</span>
+                        <input type="email" name="email" autocomplete="email" required>
+                    </label>
+                </div>
+
+                <label>
+                    <span>문의 유형</span>
+                    <select name="topic" required>
+                        <option value="당첨 소식 자랑">당첨 소식 자랑</option>
+                        <option value="기부 문의">기부 문의</option>
+                        <option value="기타 문의">기타 문의</option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>내용</span>
+                    <textarea name="message" rows="4" placeholder="당첨 후기나 기부 관련 문의를 남겨주세요." required></textarea>
+                </label>
+
+                <input type="hidden" name="_subject" value="Lotto Pick 문의">
+                <button class="submit-button" type="submit">문의 보내기</button>
+                <p class="form-status" id="formStatus" aria-live="polite"></p>
+            </form>
         </section>
     </main>
     <script src="script.js"></script>

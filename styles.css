@@ -206,10 +206,16 @@ h1 {
 }
 
 .ticket.compact {
-    display: flex;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
+}
+
+.ticket.compact::before,
+.ticket.compact::after {
+    display: none;
 }
 
 .ticket::before,
@@ -271,10 +277,9 @@ h1 {
 .number-line {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 6px;
     min-width: 0;
-    flex: 1;
 }
 
 .balls {
@@ -285,7 +290,7 @@ h1 {
 
 .ticket.compact .balls {
     grid-template-columns: repeat(6, 34px);
-    justify-content: end;
+    justify-content: center;
     gap: 5px;
 }
 
@@ -453,6 +458,7 @@ h1 {
     }
 
     .ticket.compact {
+        grid-template-columns: 32px minmax(0, 1fr);
         gap: 6px;
         padding: 7px 9px;
     }

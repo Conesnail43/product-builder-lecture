@@ -3,15 +3,19 @@ const MODEL_URL = 'https://teachablemachine.withgoogle.com/models/QUHdMbfcM/';
 let model;
 let webcam;
 let maxPredictions = 0;
-let animationFrameId;
 let isRunning = false;
+let activeObjectUrl;
 
 const body = document.body;
 const themeToggle = document.getElementById('themeToggle');
 const startBtn = document.getElementById('startBtn');
+const captureBtn = document.getElementById('captureBtn');
 const stopBtn = document.getElementById('stopBtn');
 const webcamContainer = document.getElementById('webcam-container');
 const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+const previewImage = document.getElementById('previewImage');
+const imageUpload = document.getElementById('imageUpload');
+const captureCanvas = document.getElementById('captureCanvas');
 const labelContainer = document.getElementById('label-container');
 const topAnimal = document.getElementById('topAnimal');
 const topScore = document.getElementById('topScore');
@@ -40,8 +44,8 @@ function setStatus(message) {
 function resetResults() {
     topAnimal.textContent = '대기 중';
     topScore.textContent = '0%';
-    resultCaption.textContent = '카메라를 켜면 가장 가까운 동물상이 표시됩니다.';
-    labelContainer.innerHTML = '<div class="empty-state">테스트 시작을 누르면 동물상 분석 결과가 표시됩니다.</div>';
+    resultCaption.textContent = '사진을 촬영하거나 업로드하면 가장 가까운 동물상이 표시됩니다.';
+    labelContainer.innerHTML = '<div class="empty-state">카메라로 촬영하거나 사진 파일을 업로드하면 결과가 표시됩니다.</div>';
 }
 
 function renderPredictions(predictions) {
@@ -103,14 +107,17 @@ async function startTest() {
 
         isRunning = true;
         cameraPlaceholder.hidden = true;
+        previewImage.hidden = true;
         webcamContainer.appendChild(webcam.canvas);
         webcam.canvas.className = 'webcam-canvas';
 
+        startBtn.disabled = true;
+        captureBtn.disabled = false;
         stopBtn.disabled = false;
-        setStatus(`${maxPredictions}가지 동물상을 분석 중입니다.`);
-        loop();
+        setStatus('카메라가 켜졌습니다. 촬영 분석을 누르면 현재 화면으로 결과를 계산합니다.');
     } catch (error) {
         startBtn.disabled = false;
+        captureBtn.disabled = true;
         stopBtn.disabled = true;
         setStatus('카메라 또는 모델을 불러오지 못했습니다.');
     }
@@ -119,11 +126,8 @@ async function startTest() {
 function stopTest() {
     isRunning = false;
     startBtn.disabled = false;
+    captureBtn.disabled = true;
     stopBtn.disabled = true;
-
-    if (animationFrameId) {
-        window.cancelAnimationFrame(animationFrameId);
-    }
 
     if (webcam) {
         webcam.stop();
@@ -131,23 +135,78 @@ function stopTest() {
         webcam = null;
     }
 
-    cameraPlaceholder.hidden = false;
-    setStatus('테스트가 정지되었습니다.');
+    if (previewImage.hidden) {
+        cameraPlaceholder.hidden = false;
+    }
+
+    setStatus('카메라가 정지되었습니다.');
 }
 
-async function loop() {
-    if (!isRunning || !webcam) {
+function stopCameraAfterCapture() {
+    isRunning = false;
+    startBtn.disabled = false;
+    captureBtn.disabled = true;
+    stopBtn.disabled = true;
+
+    if (webcam) {
+        webcam.stop();
+        webcam.canvas.remove();
+        webcam = null;
+    }
+}
+
+function clearObjectUrl() {
+    if (activeObjectUrl) {
+        URL.revokeObjectURL(activeObjectUrl);
+        activeObjectUrl = null;
+    }
+}
+
+async function analyzeImage(imageElement) {
+    await loadModel();
+    setStatus('사진을 분석하는 중입니다...');
+    const predictions = await model.predict(imageElement);
+    renderPredictions(predictions);
+    setStatus(`${maxPredictions}가지 동물상 분석이 완료되었습니다.`);
+}
+
+async function captureAndAnalyze() {
+    if (!webcam) {
         return;
     }
 
     webcam.update();
-    await predict();
-    animationFrameId = window.requestAnimationFrame(loop);
+    const context = captureCanvas.getContext('2d');
+    context.drawImage(webcam.canvas, 0, 0, captureCanvas.width, captureCanvas.height);
+
+    clearObjectUrl();
+    previewImage.src = captureCanvas.toDataURL('image/png');
+    previewImage.hidden = false;
+    cameraPlaceholder.hidden = true;
+    stopCameraAfterCapture();
+
+    await analyzeImage(captureCanvas);
 }
 
-async function predict() {
-    const predictions = await model.predict(webcam.canvas);
-    renderPredictions(predictions);
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    stopTest();
+    clearObjectUrl();
+    activeObjectUrl = URL.createObjectURL(file);
+
+    previewImage.onload = async function() {
+        cameraPlaceholder.hidden = true;
+        previewImage.hidden = false;
+        await analyzeImage(previewImage);
+    };
+
+    previewImage.src = activeObjectUrl;
+    setStatus('업로드한 사진을 준비하는 중입니다...');
 }
 
 themeToggle.addEventListener('click', function() {
@@ -156,7 +215,9 @@ themeToggle.addEventListener('click', function() {
 });
 
 startBtn.addEventListener('click', startTest);
+captureBtn.addEventListener('click', captureAndAnalyze);
 stopBtn.addEventListener('click', stopTest);
+imageUpload.addEventListener('change', handleImageUpload);
 
 setTheme(localStorage.getItem('animal-face-theme') || 'light');
 resetResults();

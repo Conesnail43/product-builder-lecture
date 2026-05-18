@@ -16,45 +16,45 @@ const QUESTIONS = [
         id: 'changed-plan',
         text: '오늘 누군가 갑자기 일정을 바꾼다면?',
         options: [
-            { text: '이유를 듣고 가능한 선에서 조정한다', delta: { empathy: 2, stability: 1 }, tag: '배려' },
-            { text: '괜찮다고 하지만 내 시간을 다시 정리한다', delta: { boundary: 2, recovery: 1 }, tag: '경계' },
-            { text: '다음부터는 약속을 더 명확히 잡는다', delta: { responsibility: 2, boundary: 1 }, tag: '정리' }
+            { text: '이유를 듣고 가능한 선에서 조정한다', delta: { empathy: 2, stability: 1 }, mbti: { decision: 1, lifestyle: 1 }, tag: '배려' },
+            { text: '괜찮다고 하지만 내 시간을 다시 정리한다', delta: { boundary: 2, recovery: 1 }, mbti: { energy: -1, decision: -1 }, tag: '경계' },
+            { text: '다음부터는 약속을 더 명확히 잡는다', delta: { responsibility: 2, boundary: 1 }, mbti: { decision: -1, lifestyle: -1 }, tag: '정리' }
         ]
     },
     {
         id: 'new-thing',
         text: '작은 새 기회가 생겼을 때 더 가까운 반응은?',
         options: [
-            { text: '일단 해보고 나중에 조정한다', delta: { exploration: 2, expression: 1 }, tag: '탐험' },
-            { text: '조건을 확인한 뒤 움직인다', delta: { responsibility: 2, stability: 1 }, tag: '정돈' },
-            { text: '지금 에너지가 충분한지 먼저 본다', delta: { recovery: 2, boundary: 1 }, tag: '회복' }
+            { text: '일단 해보고 나중에 조정한다', delta: { exploration: 2, expression: 1 }, mbti: { perception: 1, lifestyle: 1, energy: 1 }, tag: '탐험' },
+            { text: '조건을 확인한 뒤 움직인다', delta: { responsibility: 2, stability: 1 }, mbti: { perception: -1, lifestyle: -1, decision: -1 }, tag: '정돈' },
+            { text: '지금 에너지가 충분한지 먼저 본다', delta: { recovery: 2, boundary: 1 }, mbti: { energy: -1, lifestyle: -1 }, tag: '회복' }
         ]
     },
     {
         id: 'emotion',
         text: '오늘 마음을 누군가에게 보여줘야 한다면?',
         options: [
-            { text: '있는 그대로 짧게 말한다', delta: { expression: 2, empathy: 1 }, tag: '표현' },
-            { text: '조금 정리한 뒤 필요한 만큼만 말한다', delta: { boundary: 1, stability: 2 }, tag: '균형' },
-            { text: '말보다 행동으로 티를 낸다', delta: { responsibility: 1, recovery: 1 }, tag: '관찰' }
+            { text: '있는 그대로 짧게 말한다', delta: { expression: 2, empathy: 1 }, mbti: { energy: 1, decision: 1 }, tag: '표현' },
+            { text: '조금 정리한 뒤 필요한 만큼만 말한다', delta: { boundary: 1, stability: 2 }, mbti: { energy: -1, decision: -1, lifestyle: -1 }, tag: '균형' },
+            { text: '말보다 행동으로 티를 낸다', delta: { responsibility: 1, recovery: 1 }, mbti: { perception: -1, energy: -1 }, tag: '관찰' }
         ]
     },
     {
         id: 'tired',
         text: '피로가 느껴지는 날, 가장 필요한 것은?',
         options: [
-            { text: '혼자 조용히 회복할 시간', delta: { recovery: 3, boundary: 1 }, tag: '휴식' },
-            { text: '가까운 사람과 짧은 대화', delta: { empathy: 2, expression: 1 }, tag: '연결' },
-            { text: '작은 일을 하나 끝내는 감각', delta: { responsibility: 2, stability: 1 }, tag: '완료' }
+            { text: '혼자 조용히 회복할 시간', delta: { recovery: 3, boundary: 1 }, mbti: { energy: -1, lifestyle: -1 }, tag: '휴식' },
+            { text: '가까운 사람과 짧은 대화', delta: { empathy: 2, expression: 1 }, mbti: { energy: 1, decision: 1 }, tag: '연결' },
+            { text: '작은 일을 하나 끝내는 감각', delta: { responsibility: 2, stability: 1 }, mbti: { decision: -1, lifestyle: -1, perception: -1 }, tag: '완료' }
         ]
     },
     {
         id: 'conflict',
         text: '의견이 다를 때 나는 주로',
         options: [
-            { text: '상대의 맥락을 먼저 들어본다', delta: { empathy: 3 }, tag: '공감' },
-            { text: '내 기준을 차분히 설명한다', delta: { boundary: 2, expression: 1 }, tag: '기준' },
-            { text: '공통 목표를 찾아 정리한다', delta: { stability: 1, responsibility: 2 }, tag: '중재' }
+            { text: '상대의 맥락을 먼저 들어본다', delta: { empathy: 3 }, mbti: { decision: 1, perception: 1 }, tag: '공감' },
+            { text: '내 기준을 차분히 설명한다', delta: { boundary: 2, expression: 1 }, mbti: { decision: -1, energy: 1 }, tag: '기준' },
+            { text: '공통 목표를 찾아 정리한다', delta: { stability: 1, responsibility: 2 }, mbti: { decision: -1, lifestyle: -1, perception: 1 }, tag: '중재' }
         ]
     }
 ];
@@ -77,6 +77,13 @@ const STAT_RATIONALE = {
     responsibility: '약속, 실행, 정리로 이어지는 선택',
     recovery: '피로를 알아차리고 회복을 우선하는 선택',
     stability: '상황을 차분히 정돈하고 균형을 만드는 선택'
+};
+
+const MBTI_AXIS_LABELS = {
+    energy: { positive: 'E 외향 에너지', negative: 'I 내향 회복' },
+    perception: { positive: 'N 가능성 감각', negative: 'S 현실 감각' },
+    decision: { positive: 'F 관계 판단', negative: 'T 구조 판단' },
+    lifestyle: { positive: 'P 유동 리듬', negative: 'J 정돈 리듬' }
 };
 
 const MUTATIONS = [
@@ -123,6 +130,13 @@ function loadPet() {
         if (saved.core && !saved.core.birthRhythm) {
             saved.core.birthRhythm = buildBirthRhythm(saved.core.primaryElement || 'water', saved.core.secondaryElement || 'water', 'unknown');
         }
+        if (saved.core && !saved.core.mbti) {
+            saved.core.mbti = buildMbtiProfileFromScores(saved.core.mbtiScores);
+        }
+        if (saved.core && !saved.core.mbtiScores) {
+            saved.core.mbtiScores = saved.core.mbti?.scores || createMbtiScores();
+            saved.core.mbti = buildMbtiProfileFromScores(saved.core.mbtiScores);
+        }
         return saved;
     } catch {
         return null;
@@ -161,6 +175,7 @@ function createPet() {
     const primaryElement = getElementFromBirth(birthDate);
     const secondaryElement = getSecondaryElement(birthTime);
     const element = ELEMENTS[primaryElement];
+    const mbtiScores = createMbtiScores();
 
     pet = {
         name: avatarNameInput.value.trim() || `${element.label}의 씨앗`,
@@ -170,6 +185,8 @@ function createPet() {
             primaryElement,
             secondaryElement,
             birthRhythm: buildBirthRhythm(primaryElement, secondaryElement, birthTime),
+            mbtiScores,
+            mbti: buildMbtiProfileFromScores(mbtiScores),
             body: element.body,
             eyes: birthTime === 'night' ? 'deep' : 'soft',
             palette: element.palette
@@ -190,6 +207,46 @@ function createPet() {
     };
     savePet();
     renderApp();
+}
+
+function createMbtiScores() {
+    return { energy: 0, perception: 0, decision: 0, lifestyle: 0 };
+}
+
+function buildMbtiProfileFromScores(scores = createMbtiScores()) {
+    const normalizedScores = { ...createMbtiScores(), ...scores };
+    const hasSignal = Object.values(normalizedScores).some((value) => value !== 0);
+    const axes = {
+        energy: Math.sign(normalizedScores.energy),
+        perception: Math.sign(normalizedScores.perception),
+        decision: Math.sign(normalizedScores.decision),
+        lifestyle: Math.sign(normalizedScores.lifestyle)
+    };
+    if (!hasSignal) {
+        return {
+            type: 'observing',
+            label: '성향 관찰 전',
+            axes,
+            scores: normalizedScores
+        };
+    }
+    const type = [
+        axes.energy === 0 ? '?' : axes.energy > 0 ? 'E' : 'I',
+        axes.perception === 0 ? '?' : axes.perception > 0 ? 'N' : 'S',
+        axes.decision === 0 ? '?' : axes.decision > 0 ? 'F' : 'T',
+        axes.lifestyle === 0 ? '?' : axes.lifestyle > 0 ? 'P' : 'J'
+    ].join('');
+    const labels = Object.entries(axes).map(([axis, value]) => {
+        const axisLabel = MBTI_AXIS_LABELS[axis];
+        if (value === 0) return `${axisLabel.positive.slice(0, 1)}/${axisLabel.negative.slice(0, 1)} 관찰 중`;
+        return value > 0 ? axisLabel.positive : axisLabel.negative;
+    });
+    return {
+        type,
+        label: `${type} 경향 · ${labels.join(' · ')}`,
+        axes,
+        scores: normalizedScores
+    };
 }
 
 function buildBirthRhythm(primaryElement, secondaryElement, birthTime) {
@@ -253,6 +310,16 @@ function applyAnswerDeltas(selected) {
     });
 }
 
+function applyMbtiSignals(selected) {
+    pet.core.mbtiScores = pet.core.mbtiScores || createMbtiScores();
+    selected.forEach(({ option }) => {
+        Object.entries(option.mbti || {}).forEach(([axis, value]) => {
+            pet.core.mbtiScores[axis] = (pet.core.mbtiScores[axis] || 0) + value;
+        });
+    });
+    pet.core.mbti = buildMbtiProfileFromScores(pet.core.mbtiScores);
+}
+
 function getDominantStat() {
     return Object.entries(pet.stats).sort((a, b) => b[1] - a[1])[0][0];
 }
@@ -308,6 +375,7 @@ function completeDaily() {
     if (selected.some(({ option }) => !option)) return;
 
     applyAnswerDeltas(selected);
+    applyMbtiSignals(selected);
     const topTag = selected[0].option.tag;
     const deltaSummary = summarizeDeltas(selected);
     pet.dailyAura = getAuraFromTag(topTag);
@@ -324,9 +392,11 @@ function completeDaily() {
             question: question.text,
             answer: option.text,
             delta: option.delta,
+            mbti: option.mbti || {},
             tag: option.tag
         })),
         deltaSummary,
+        mbtiSummary: summarizeMbtiSignals(selected),
         dominantStat,
         gained,
         aura: pet.dailyAura
@@ -338,6 +408,15 @@ function completeDaily() {
     savePet();
     renderApp();
     showEvolution(entry);
+}
+
+function summarizeMbtiSignals(selected) {
+    return selected.reduce((totals, { option }) => {
+        Object.entries(option.mbti || {}).forEach(([axis, value]) => {
+            totals[axis] = (totals[axis] || 0) + value;
+        });
+        return totals;
+    }, {});
 }
 
 function buildEvolutionName(stat, tag) {
@@ -383,10 +462,15 @@ function showEvolution(entry) {
 
 function renderEvidence(entry) {
     const deltas = entry.deltaSummary || {};
+    const mbtiSignals = entry.mbtiSummary || {};
     const evidence = entry.evidence || [];
     const topStats = Object.entries(deltas)
         .sort((a, b) => b[1] - a[1])
         .map(([stat, value]) => `<span>${STAT_LABELS[stat]} +${value}</span>`)
+        .join('');
+    const mbtiTags = Object.entries(mbtiSignals)
+        .filter(([, value]) => value !== 0)
+        .map(([axis, value]) => `<span>${formatMbtiSignal(axis, value)}</span>`)
         .join('');
     const selectedList = evidence.map((item) => `
         <li>
@@ -401,10 +485,24 @@ function renderEvidence(entry) {
             <p>오늘의 근거</p>
             <div>${topStats}</div>
         </div>
+        ${mbtiTags ? `
+            <div class="evidence-summary">
+                <p>성향 관찰</p>
+                <div>${mbtiTags}</div>
+            </div>
+        ` : ''}
         <ul>${selectedList}</ul>
         <p class="evidence-note">기본 체질: ${pet.core.birthRhythm || '태어난 리듬 정보 없음'}</p>
+        <p class="evidence-note">현재 성향: ${pet.core.mbti?.label || '성향 관찰 전'}</p>
         <p class="evidence-note">${STAT_LABELS[entry.dominantStat] || '성장'}은 ${dominant}을 의미합니다.</p>
     `;
+}
+
+function formatMbtiSignal(axis, value) {
+    const labels = MBTI_AXIS_LABELS[axis];
+    if (!labels) return `${axis} ${value > 0 ? '+' : ''}${value}`;
+    const label = value > 0 ? labels.positive : labels.negative;
+    return `${label} ${value > 0 ? '+' : ''}${value}`;
 }
 
 function renderApp() {
@@ -431,7 +529,8 @@ function renderApp() {
     petLine.textContent = !IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY
         ? '오늘의 선택이 아바타에 작은 흔적으로 남았습니다.'
         : '오늘의 세 가지 선택을 기다리고 있습니다.';
-    birthRhythm.textContent = pet.core.birthRhythm || buildBirthRhythm(pet.core.primaryElement, pet.core.secondaryElement, 'unknown');
+    const mbtiLabel = pet.core.mbti?.label || '성향 관찰 전';
+    birthRhythm.textContent = `${pet.core.birthRhythm || buildBirthRhythm(pet.core.primaryElement, pet.core.secondaryElement, 'unknown')} · ${mbtiLabel}`;
     renderAvatar(pet);
     renderStats();
     renderGrowthLog();
@@ -474,6 +573,7 @@ function renderAvatar(state) {
     const palette = state.core.palette || ELEMENTS.water.palette;
     const body = state.core.body;
     const primaryElement = state.core.primaryElement || 'water';
+    const mbti = state.core.mbti || buildMbtiProfileFromScores(state.core.mbtiScores);
     const mutations = state.mutations || [];
     const aura = state.dailyAura || 'mist';
     const stage = state.stage || 1;
@@ -501,6 +601,7 @@ function renderAvatar(state) {
             ${renderBody(body, shell, stage)}
             ${renderFeet(palette, stage)}
             ${renderElementMark(primaryElement, palette, stage)}
+            ${renderMbtiTraits(mbti, palette, stage)}
             ${root ? renderRoots() : ''}
             ${glow ? renderGlow() : ''}
             ${renderCheeks(palette, stage)}
@@ -508,6 +609,32 @@ function renderAvatar(state) {
             ${renderParticles(aura, palette)}
         </svg>
     `;
+}
+
+function renderMbtiTraits(mbti, palette, stage) {
+    if (!mbti || !Object.values(mbti.axes || {}).some((value) => value !== 0)) return '';
+    const axes = mbti.axes || {};
+    const energy = axes.energy > 0
+        ? '<circle class="mbti-pulse" cx="58" cy="103" r="6" fill="' + palette[2] + '"/><circle class="mbti-pulse" cx="202" cy="103" r="6" fill="' + palette[2] + '"/>'
+        : axes.energy < 0
+            ? '<path d="M88 104 C99 91 116 86 130 87 C113 96 101 107 95 122Z" fill="rgba(32,36,42,.18)"/>'
+            : '';
+    const perception = axes.perception > 0
+        ? '<path d="M130 62 L136 75 L150 76 L139 85 L142 99 L130 91 L118 99 L121 85 L110 76 L124 75Z" fill="' + palette[2] + '" opacity=".78"/>'
+        : axes.perception < 0
+            ? '<path d="M96 181 L112 176 L128 181 L144 176 L160 181" fill="none" stroke="' + palette[2] + '" stroke-width="4" stroke-linecap="round" opacity=".72"/>'
+            : '';
+    const decision = axes.decision > 0
+        ? '<circle cx="82" cy="132" r="6" fill="#ff9fb0" opacity=".72"/><circle cx="178" cy="132" r="6" fill="#ff9fb0" opacity=".72"/>'
+        : axes.decision < 0
+            ? '<path d="M105 91 L155 91" stroke="rgba(255,255,255,.62)" stroke-width="5" stroke-linecap="round"/>'
+            : '';
+    const lifestyle = axes.lifestyle > 0
+        ? '<path d="M71 188 C89 203 111 203 128 190 C145 177 168 177 189 190" fill="none" stroke="' + palette[1] + '" stroke-width="4" stroke-linecap="round" opacity=".65"/>'
+        : axes.lifestyle < 0
+            ? '<circle cx="130" cy="205" r="34" fill="none" stroke="' + palette[1] + '" stroke-width="4" opacity=".5"/>'
+            : '';
+    return `<g class="mbti-traits" opacity="${stage >= 2 ? '.95' : '.62'}">${energy}${perception}${decision}${lifestyle}</g>`;
 }
 
 function renderAura(aura, palette, mist) {

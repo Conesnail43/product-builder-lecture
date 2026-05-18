@@ -1384,8 +1384,13 @@ h1 {
 
 .avatar-ear,
 .avatar-tail,
-.avatar-foot {
+.avatar-foot,
+.mbti-traits {
     filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .16));
+}
+
+.mbti-pulse {
+    animation: auraPulse 3.2s ease-in-out infinite;
 }
 
 .avatar-aura {
@@ -1492,7 +1497,7 @@ h1 {
 
 .onboarding-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
 }
 

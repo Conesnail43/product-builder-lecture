@@ -25,10 +25,17 @@ const statusText = document.getElementById('statusText');
 const resultCaption = document.getElementById('resultCaption');
 
 const ANIMAL_RESULTS = {
-    '강아지': { badge: 'DOG', tone: 'dog', copy: '밝고 친근한 인상이 강하게 잡혔습니다.' },
-    '고양이': { badge: 'CAT', tone: 'cat', copy: '차분하고 또렷한 분위기가 두드러집니다.' },
-    '사슴': { badge: 'DEER', tone: 'deer', copy: '부드럽고 맑은 인상이 가장 높게 나왔습니다.' },
-    '공룡': { badge: 'DINO', tone: 'dino', copy: '개성 있고 선명한 인상이 강하게 잡혔습니다.' }
+    '강아지상': { badge: 'DOG', tone: 'dog', copy: '밝고 친근한 인상이 강하게 잡혔습니다.' },
+    '고양이상': { badge: 'CAT', tone: 'cat', copy: '차분하고 또렷한 분위기가 두드러집니다.' },
+    '사슴상': { badge: 'DEER', tone: 'deer', copy: '부드럽고 맑은 인상이 가장 높게 나왔습니다.' },
+    '공룡상': { badge: 'DINO', tone: 'dino', copy: '개성 있고 선명한 인상이 강하게 잡혔습니다.' },
+    '꼬부기상': { badge: 'TURTLE', tone: 'turtle', copy: '둥글고 편안한 분위기가 가장 높게 나왔습니다.' },
+    '사마귀상': { badge: 'MANTIS', tone: 'mantis', copy: '날렵하고 또렷한 인상이 강하게 잡혔습니다.' },
+    '말상': { badge: 'HORSE', tone: 'horse', copy: '시원하고 균형 잡힌 인상이 두드러집니다.' },
+    '곰상': { badge: 'BEAR', tone: 'bear', copy: '묵직하고 포근한 분위기가 가장 높게 나왔습니다.' },
+    '늑대상': { badge: 'WOLF', tone: 'wolf', copy: '선명하고 카리스마 있는 인상이 강하게 잡혔습니다.' },
+    '다람쥐상': { badge: 'SQUIRREL', tone: 'squirrel', copy: '작고 생기 있는 분위기가 두드러집니다.' },
+    '뱀상': { badge: 'SNAKE', tone: 'snake', copy: '차분하면서 날카로운 인상이 가장 높게 나왔습니다.' }
 };
 
 function setStatus(message) {

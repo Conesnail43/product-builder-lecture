@@ -742,6 +742,34 @@ h1 {
     line-height: 1.45;
 }
 
+.animal-insight {
+    display: grid;
+    gap: 8px;
+    width: min(100%, 360px);
+    text-align: left;
+}
+
+.animal-insight div {
+    display: grid;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel) 68%, transparent);
+}
+
+.animal-insight span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.animal-insight strong {
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
 .score-ring {
     display: grid;
     width: 92px;

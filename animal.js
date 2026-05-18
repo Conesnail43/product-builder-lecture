@@ -24,19 +24,23 @@ const topScore = document.getElementById('topScore');
 const animalBadge = document.getElementById('animalBadge');
 const statusText = document.getElementById('statusText');
 const resultCaption = document.getElementById('resultCaption');
+const animalStyle = document.getElementById('animalStyle');
+const animalKeywords = document.getElementById('animalKeywords');
+const animalBlend = document.getElementById('animalBlend');
+const MIX_THRESHOLD_POINTS = 12;
 
 const ANIMAL_RESULTS = {
-    '강아지상': { badge: 'DOG', tone: 'dog', copy: '밝고 친근한 인상이 강하게 잡혔습니다.' },
-    '고양이상': { badge: 'CAT', tone: 'cat', copy: '차분하고 또렷한 분위기가 두드러집니다.' },
-    '사슴상': { badge: 'DEER', tone: 'deer', copy: '부드럽고 맑은 인상이 가장 높게 나왔습니다.' },
-    '공룡상': { badge: 'DINO', tone: 'dino', copy: '개성 있고 선명한 인상이 강하게 잡혔습니다.' },
-    '꼬부기상': { badge: 'TURTLE', tone: 'turtle', copy: '둥글고 편안한 분위기가 가장 높게 나왔습니다.' },
-    '사마귀상': { badge: 'MANTIS', tone: 'mantis', copy: '날렵하고 또렷한 인상이 강하게 잡혔습니다.' },
-    '말상': { badge: 'HORSE', tone: 'horse', copy: '시원하고 균형 잡힌 인상이 두드러집니다.' },
-    '곰상': { badge: 'BEAR', tone: 'bear', copy: '묵직하고 포근한 분위기가 가장 높게 나왔습니다.' },
-    '늑대상': { badge: 'WOLF', tone: 'wolf', copy: '선명하고 카리스마 있는 인상이 강하게 잡혔습니다.' },
-    '다람쥐상': { badge: 'SQUIRREL', tone: 'squirrel', copy: '작고 생기 있는 분위기가 두드러집니다.' },
-    '뱀상': { badge: 'SNAKE', tone: 'snake', copy: '차분하면서 날카로운 인상이 가장 높게 나왔습니다.' }
+    '강아지상': { badge: 'DOG', tone: 'dog', copy: '밝고 친근한 인상이 강하게 잡혔습니다.', style: '햇살 같은 친근함', keywords: ['밝은 미소', '둥근 인상', '편안한 눈매'] },
+    '고양이상': { badge: 'CAT', tone: 'cat', copy: '차분하고 또렷한 분위기가 두드러집니다.', style: '시크하고 또렷한 분위기', keywords: ['선명한 눈매', '차분한 표정', '도시적인 인상'] },
+    '사슴상': { badge: 'DEER', tone: 'deer', copy: '부드럽고 맑은 인상이 가장 높게 나왔습니다.', style: '맑고 청순한 분위기', keywords: ['부드러운 선', '맑은 눈빛', '온화한 표정'] },
+    '공룡상': { badge: 'DINO', tone: 'dino', copy: '개성 있고 선명한 인상이 강하게 잡혔습니다.', style: '개성 있는 존재감', keywords: ['뚜렷한 윤곽', '강한 인상', '장난스러운 매력'] },
+    '꼬부기상': { badge: 'TURTLE', tone: 'turtle', copy: '둥글고 편안한 분위기가 가장 높게 나왔습니다.', style: '둥글고 귀여운 안정감', keywords: ['동글한 얼굴선', '순한 인상', '편안한 미소'] },
+    '사마귀상': { badge: 'MANTIS', tone: 'mantis', copy: '날렵하고 또렷한 인상이 강하게 잡혔습니다.', style: '날렵하고 선명한 분위기', keywords: ['샤프한 선', '집중된 눈빛', '또렷한 이목구비'] },
+    '말상': { badge: 'HORSE', tone: 'horse', copy: '시원하고 균형 잡힌 인상이 두드러집니다.', style: '시원하고 건강한 인상', keywords: ['긴 얼굴선', '반듯한 분위기', '활동적인 이미지'] },
+    '곰상': { badge: 'BEAR', tone: 'bear', copy: '묵직하고 포근한 분위기가 가장 높게 나왔습니다.', style: '포근하고 든든한 분위기', keywords: ['부드러운 존재감', '따뜻한 인상', '안정적인 표정'] },
+    '늑대상': { badge: 'WOLF', tone: 'wolf', copy: '선명하고 카리스마 있는 인상이 강하게 잡혔습니다.', style: '차분한 카리스마', keywords: ['깊은 눈매', '절제된 표정', '강한 분위기'] },
+    '다람쥐상': { badge: 'SQUIRREL', tone: 'squirrel', copy: '작고 생기 있는 분위기가 두드러집니다.', style: '발랄하고 사랑스러운 이미지', keywords: ['생기 있는 표정', '작은 포인트', '밝은 에너지'] },
+    '뱀상': { badge: 'SNAKE', tone: 'snake', copy: '차분하면서 날카로운 인상이 가장 높게 나왔습니다.', style: '신비롭고 날카로운 분위기', keywords: ['차분한 눈빛', '얇고 선명한 선', '묘한 존재감'] }
 };
 
 function setStatus(message) {
@@ -56,20 +60,34 @@ function resetAnimalResults() {
     animalBadge.textContent = '?';
     animalBadge.className = 'animal-badge';
     resultCaption.textContent = '사진을 촬영하거나 업로드하면 가장 가까운 동물상이 표시됩니다.';
+    animalStyle.textContent = '분석 대기 중';
+    animalKeywords.textContent = '사진을 넣으면 표시됩니다';
+    animalBlend.textContent = '결과 없음';
     labelContainer.innerHTML = '<div class="empty-state">카메라로 촬영하거나 사진 파일을 업로드하면 결과가 표시됩니다.</div>';
 }
 
 function renderPredictions(predictions) {
     const sorted = [...predictions].sort((a, b) => b.probability - a.probability);
     const best = sorted[0];
+    const second = sorted[1];
     const bestScore = Math.round(best.probability * 100);
+    const secondScore = second ? Math.round(second.probability * 100) : 0;
     const meta = ANIMAL_RESULTS[best.className];
+    const secondMeta = second ? ANIMAL_RESULTS[second.className] : null;
+    const isMixed = second && bestScore - secondScore <= MIX_THRESHOLD_POINTS;
 
     topAnimal.textContent = best.className;
     topScore.textContent = `${bestScore}%`;
     animalBadge.textContent = meta?.badge || best.className;
     animalBadge.className = `animal-badge ${meta?.tone || ''}`.trim();
-    resultCaption.textContent = meta?.copy || '가장 높은 확률의 동물상이 표시되었습니다.';
+    resultCaption.textContent = isMixed
+        ? `${best.className}에 가깝지만 ${second.className} 분위기도 함께 보입니다.`
+        : meta?.copy || '가장 높은 확률의 동물상이 표시되었습니다.';
+    animalStyle.textContent = meta?.style || '가장 높은 확률의 동물상';
+    animalKeywords.textContent = meta?.keywords?.join(' · ') || '분석 키워드 없음';
+    animalBlend.textContent = second
+        ? `${isMixed ? '혼합형' : '보조'}: ${second.className} ${secondScore}%${secondMeta ? ` · ${secondMeta.style}` : ''}`
+        : '보조 결과 없음';
 
     labelContainer.innerHTML = sorted.map((p) => {
         const score = Math.round(p.probability * 100);

@@ -67,6 +67,16 @@ const STAT_LABELS = {
     stability: '안정'
 };
 
+const STAT_RATIONALE = {
+    empathy: '타인의 감정과 맥락을 고려하는 선택',
+    boundary: '나의 시간, 에너지, 기준을 지키는 선택',
+    exploration: '불확실성 속에서 새 시도를 향하는 선택',
+    expression: '생각이나 감정을 드러내는 선택',
+    responsibility: '약속, 실행, 정리로 이어지는 선택',
+    recovery: '피로를 알아차리고 회복을 우선하는 선택',
+    stability: '상황을 차분히 정돈하고 균형을 만드는 선택'
+};
+
 const MUTATIONS = [
     { id: 'softGlow', label: '부드러운 빛점', stat: 'empathy', threshold: 6 },
     { id: 'thinShell', label: '얇은 보호 껍질', stat: 'boundary', threshold: 6 },
@@ -93,6 +103,7 @@ const completeDailyBtn = document.getElementById('completeDailyBtn');
 const evolutionCard = document.getElementById('evolutionCard');
 const evolutionName = document.getElementById('evolutionName');
 const evolutionText = document.getElementById('evolutionText');
+const evidencePanel = document.getElementById('evidencePanel');
 const mutationList = document.getElementById('mutationList');
 const growthLog = document.getElementById('growthLog');
 
@@ -192,13 +203,20 @@ function renderQuestions() {
             <div class="answer-grid">
                 ${question.options.map((option, optionIndex) => `
                     <button class="answer-option" type="button" data-question="${question.id}" data-option="${optionIndex}">
-                        ${option.text}
+                        <strong>${option.text}</strong>
+                        <span>${formatDelta(option.delta)}</span>
                     </button>
                 `).join('')}
             </div>
         </article>
     `).join('');
     completeDailyBtn.disabled = true;
+}
+
+function formatDelta(delta) {
+    return Object.entries(delta)
+        .map(([stat, value]) => `${STAT_LABELS[stat]} +${value}`)
+        .join(' · ');
 }
 
 function applyAnswerDeltas(selected) {
@@ -222,6 +240,15 @@ function updateMutations() {
         }
     });
     return gained;
+}
+
+function summarizeDeltas(selected) {
+    return selected.reduce((totals, { option }) => {
+        Object.entries(option.delta).forEach(([stat, value]) => {
+            totals[stat] = (totals[stat] || 0) + value;
+        });
+        return totals;
+    }, {});
 }
 
 function getAuraFromTag(tag) {
@@ -254,6 +281,7 @@ function completeDaily() {
 
     applyAnswerDeltas(selected);
     const topTag = selected[0].option.tag;
+    const deltaSummary = summarizeDeltas(selected);
     pet.dailyAura = getAuraFromTag(topTag);
     pet.stage = Math.min(4, 1 + Math.floor(pet.log.length / 4));
     const gained = updateMutations();
@@ -264,6 +292,14 @@ function completeDaily() {
         date: TODAY_KEY,
         name: dayName,
         text: `${STAT_LABELS[dominantStat]}의 흐름이 가장 크게 자랐습니다. 오늘의 ${topTag} 선택은 ${pet.name}에게 새로운 흔적으로 남았습니다.`,
+        evidence: selected.map(({ question, option }) => ({
+            question: question.text,
+            answer: option.text,
+            delta: option.delta,
+            tag: option.tag
+        })),
+        deltaSummary,
+        dominantStat,
         gained,
         aura: pet.dailyAura
     };
@@ -311,9 +347,35 @@ function showEvolution(entry) {
     evolutionCard.hidden = false;
     evolutionName.textContent = entry.name;
     evolutionText.textContent = entry.text;
+    renderEvidence(entry);
     mutationList.innerHTML = entry.gained.length
         ? entry.gained.map((item) => `<span>${item} 획득</span>`).join('')
         : '<span>오늘의 오라가 변화했습니다</span>';
+}
+
+function renderEvidence(entry) {
+    const deltas = entry.deltaSummary || {};
+    const evidence = entry.evidence || [];
+    const topStats = Object.entries(deltas)
+        .sort((a, b) => b[1] - a[1])
+        .map(([stat, value]) => `<span>${STAT_LABELS[stat]} +${value}</span>`)
+        .join('');
+    const selectedList = evidence.map((item) => `
+        <li>
+            <strong>${item.tag}</strong>
+            <span>${item.answer}</span>
+        </li>
+    `).join('');
+    const dominant = entry.dominantStat ? STAT_RATIONALE[entry.dominantStat] : '오늘 선택에서 가장 크게 자란 축';
+
+    evidencePanel.innerHTML = `
+        <div class="evidence-summary">
+            <p>오늘의 근거</p>
+            <div>${topStats}</div>
+        </div>
+        <ul>${selectedList}</ul>
+        <p class="evidence-note">${STAT_LABELS[entry.dominantStat] || '성장'}은 ${dominant}을 의미합니다.</p>
+    `;
 }
 
 function renderApp() {

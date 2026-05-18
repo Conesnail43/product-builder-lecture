@@ -1464,6 +1464,14 @@ h1 {
     font-size: clamp(22px, 4vw, 36px);
 }
 
+.method-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.55;
+}
+
 .onboarding-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1515,6 +1523,8 @@ h1 {
 }
 
 .answer-option {
+    display: grid;
+    gap: 6px;
     min-height: 66px;
     padding: 10px;
     border: 1px solid var(--line);
@@ -1527,9 +1537,23 @@ h1 {
     cursor: pointer;
 }
 
+.answer-option strong {
+    font-size: 13px;
+}
+
+.answer-option span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
 .answer-option.selected {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 16%, var(--panel-strong));
+    color: var(--accent);
+}
+
+.answer-option.selected span {
     color: var(--accent);
 }
 
@@ -1549,6 +1573,69 @@ h1 {
     font-size: 15px;
     font-weight: 750;
     line-height: 1.55;
+}
+
+.evidence-panel {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--panel);
+}
+
+.evidence-summary {
+    display: grid;
+    gap: 8px;
+}
+
+.evidence-summary p,
+.evidence-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.45;
+}
+
+.evidence-summary div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.evidence-summary span {
+    padding: 6px 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 12%, var(--panel-strong));
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 950;
+}
+
+.evidence-panel ul {
+    display: grid;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.evidence-panel li {
+    display: grid;
+    gap: 3px;
+}
+
+.evidence-panel li strong {
+    color: var(--text);
+    font-size: 13px;
+}
+
+.evidence-panel li span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.45;
 }
 
 .mutation-list {

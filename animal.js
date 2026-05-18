@@ -5,6 +5,7 @@ let webcam;
 let maxPredictions = 0;
 let isRunning = false;
 let activeObjectUrl;
+let previewFrameId;
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 
 const startBtn = document.getElementById('startBtn');
@@ -97,8 +98,10 @@ async function startTest() {
         isRunning = true;
         cameraPlaceholder.hidden = true;
         previewImage.hidden = true;
+        webcamContainer.innerHTML = '';
         webcamContainer.appendChild(webcam.canvas);
         webcam.canvas.className = 'webcam-canvas';
+        updateCameraPreview();
         startBtn.disabled = true;
         captureBtn.disabled = false;
         stopBtn.disabled = false;
@@ -111,11 +114,23 @@ async function startTest() {
     }
 }
 
+function updateCameraPreview() {
+    if (!isRunning || !webcam) return;
+    webcam.update();
+    previewFrameId = window.requestAnimationFrame(updateCameraPreview);
+}
+
 function stopTest() {
     isRunning = false;
     startBtn.disabled = false;
     captureBtn.disabled = true;
     stopBtn.disabled = true;
+
+    if (previewFrameId) {
+        window.cancelAnimationFrame(previewFrameId);
+        previewFrameId = null;
+    }
+
     if (webcam) {
         webcam.stop();
         webcam.canvas.remove();
@@ -129,6 +144,12 @@ function stopCameraAfterCapture() {
     startBtn.disabled = false;
     captureBtn.disabled = true;
     stopBtn.disabled = true;
+
+    if (previewFrameId) {
+        window.cancelAnimationFrame(previewFrameId);
+        previewFrameId = null;
+    }
+
     if (webcam) {
         webcam.stop();
         webcam.canvas.remove();

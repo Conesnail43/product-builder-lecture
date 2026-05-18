@@ -1,4 +1,6 @@
-const STORAGE_KEY = 'inner-hatch-avatar-v1';
+const PET_MODE = document.body.dataset.petMode || 'daily';
+const IS_TEST_MODE = PET_MODE === 'test';
+const STORAGE_KEY = IS_TEST_MODE ? 'inner-hatch-avatar-test-v1' : 'inner-hatch-avatar-v1';
 const TODAY_KEY = new Date().toISOString().slice(0, 10);
 
 const ELEMENTS = {
@@ -107,6 +109,9 @@ const evolutionText = document.getElementById('evolutionText');
 const evidencePanel = document.getElementById('evidencePanel');
 const mutationList = document.getElementById('mutationList');
 const growthLog = document.getElementById('growthLog');
+const resetTestBtn = document.getElementById('resetTestBtn');
+const runAllTestBtn = document.getElementById('runAllTestBtn');
+const runWeekTestBtn = document.getElementById('runWeekTestBtn');
 
 let pet = loadPet();
 let answers = {};
@@ -210,6 +215,7 @@ function getDayNumber() {
 }
 
 function getDailyQuestions() {
+    if (IS_TEST_MODE) return QUESTIONS;
     const seed = TODAY_KEY.split('-').reduce((sum, part) => sum + Number(part), 0);
     return [0, 1, 2].map((offset) => QUESTIONS[(seed + offset) % QUESTIONS.length]);
 }
@@ -289,7 +295,7 @@ function getAuraFromTag(tag) {
 }
 
 function completeDaily() {
-    if (!pet || pet.lastCheckIn === TODAY_KEY) return;
+    if (!pet || (!IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY)) return;
     const questions = getDailyQuestions();
     const selected = questions.map((question) => {
         const optionIndex = answers[question.id];
@@ -298,6 +304,8 @@ function completeDaily() {
             option: question.options[optionIndex]
         };
     });
+
+    if (selected.some(({ option }) => !option)) return;
 
     applyAnswerDeltas(selected);
     const topTag = selected[0].option.tag;
@@ -309,7 +317,7 @@ function completeDaily() {
     const dayName = buildEvolutionName(dominantStat, topTag);
 
     const entry = {
-        date: TODAY_KEY,
+        date: IS_TEST_MODE ? `Test ${pet.log.length + 1}` : TODAY_KEY,
         name: dayName,
         text: `${STAT_LABELS[dominantStat]}의 흐름이 가장 크게 자랐습니다. 오늘의 ${topTag} 선택은 ${pet.name}에게 새로운 흔적으로 남았습니다.`,
         evidence: selected.map(({ question, option }) => ({
@@ -326,7 +334,7 @@ function completeDaily() {
 
     pet.log.unshift(entry);
     pet.log = pet.log.slice(0, 14);
-    pet.lastCheckIn = TODAY_KEY;
+    pet.lastCheckIn = IS_TEST_MODE ? null : TODAY_KEY;
     savePet();
     renderApp();
     showEvolution(entry);
@@ -417,10 +425,10 @@ function renderApp() {
     }
 
     onboardingCard.hidden = true;
-    dailyCard.hidden = pet.lastCheckIn === TODAY_KEY;
+    dailyCard.hidden = !IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY;
     petDay.textContent = `Day ${getDayNumber()}`;
     petName.textContent = pet.name;
-    petLine.textContent = pet.lastCheckIn === TODAY_KEY
+    petLine.textContent = !IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY
         ? '오늘의 선택이 아바타에 작은 흔적으로 남았습니다.'
         : '오늘의 세 가지 선택을 기다리고 있습니다.';
     birthRhythm.textContent = pet.core.birthRhythm || buildBirthRhythm(pet.core.primaryElement, pet.core.secondaryElement, 'unknown');
@@ -428,7 +436,7 @@ function renderApp() {
     renderStats();
     renderGrowthLog();
 
-    if (pet.lastCheckIn !== TODAY_KEY) {
+    if (IS_TEST_MODE || pet.lastCheckIn !== TODAY_KEY) {
         renderQuestions();
     } else if (pet.log[0]) {
         showEvolution(pet.log[0]);
@@ -572,5 +580,49 @@ questionStack.addEventListener('click', function (event) {
 
 createPetBtn.addEventListener('click', createPet);
 completeDailyBtn.addEventListener('click', completeDaily);
+
+if (resetTestBtn) {
+    resetTestBtn.addEventListener('click', function () {
+        localStorage.removeItem(STORAGE_KEY);
+        pet = null;
+        answers = {};
+        evolutionCard.hidden = true;
+        renderApp();
+    });
+}
+
+function createDefaultTestPet() {
+    if (pet) return;
+    avatarNameInput.value = '테스트 아바타';
+    birthDateInput.value = '1993-11-18';
+    birthTimeInput.value = 'night';
+    createPet();
+}
+
+function applyTestPattern(pattern) {
+    createDefaultTestPet();
+    const questions = getDailyQuestions();
+    answers = {};
+    questions.forEach((question, index) => {
+        answers[question.id] = pattern(index, question);
+    });
+    completeDaily();
+}
+
+if (runAllTestBtn) {
+    runAllTestBtn.addEventListener('click', function () {
+        [0, 1, 2].forEach((optionIndex) => {
+            applyTestPattern(() => optionIndex);
+        });
+    });
+}
+
+if (runWeekTestBtn) {
+    runWeekTestBtn.addEventListener('click', function () {
+        for (let day = 0; day < 7; day += 1) {
+            applyTestPattern((index) => (day + index) % 3);
+        }
+    });
+}
 
 renderApp();

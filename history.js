@@ -187,13 +187,30 @@ const FACTS = [
     }
 ];
 
+const REMOTE_HISTORY_BASE = 'https://history.muffinlabs.com/date';
+const INTERESTING_TERMS = [
+    'abolished', 'agreement', 'announces', 'attack', 'battle', 'becomes', 'begins', 'breaks out',
+    'captures', 'collapsed', 'conquest', 'coup', 'created', 'declares', 'defeats', 'discovered',
+    'earthquake', 'elected', 'ends', 'erupts', 'established', 'explodes', 'founded', 'independence',
+    'invention', 'invades', 'launched', 'liberated', 'massacre', 'mission', 'opens', 'rebel',
+    'rebellion', 'revolution', 'riot', 'signed', 'sinks', 'space', 'strike', 'treaty', 'war'
+];
+const LOW_VALUE_TERMS = [
+    'is born', 'was born', 'dies', 'died', 'birthday', 'death of', 'marries', 'married',
+    'appointed', 'crowned', 'canonized'
+];
+
+let facts = [];
 let shownIndices = [];
 let activeCategory = '전체';
+let activeDateLabel = '';
+let isLoading = false;
 
 const factYear = document.getElementById('factYear');
 const factCategory = document.getElementById('factCategory');
 const factTitle = document.getElementById('factTitle');
 const factContent = document.getElementById('factContent');
+const factSource = document.getElementById('factSource');
 const factCounter = document.getElementById('factCounter');
 const newFactBtn = document.getElementById('newFactBtn');
 const todayFactBtn = document.getElementById('todayFactBtn');
@@ -201,21 +218,176 @@ const historySearch = document.getElementById('historySearch');
 const categoryFilter = document.getElementById('categoryFilter');
 const relatedList = document.getElementById('relatedList');
 
+function getRandomDate() {
+    const year = 2024;
+    const start = new Date(year, 0, 1);
+    const dayOffset = Math.floor(Math.random() * 366);
+    const date = new Date(start);
+    date.setDate(start.getDate() + dayOffset);
+    return {
+        month: date.getMonth() + 1,
+        day: date.getDate()
+    };
+}
+
+function getTodayDate() {
+    const today = new Date();
+    return {
+        month: today.getMonth() + 1,
+        day: today.getDate()
+    };
+}
+
+function cleanText(text) {
+    return text.replace(/\s+/g, ' ').trim();
+}
+
+function getPrimaryLink(event) {
+    return event.links?.[0]?.link || `https://wikipedia.org/wiki/${encodeURIComponent(activeDateLabel.replace(' ', '_'))}`;
+}
+
+function getInterestScore(event) {
+    const text = cleanText(event.text || '');
+    const lower = text.toLowerCase();
+    let score = 0;
+
+    if (text.length >= 80) score += 2;
+    if (event.links?.length >= 2) score += 2;
+    if (/[0-9]/.test(text)) score += 1;
+
+    INTERESTING_TERMS.forEach((term) => {
+        if (lower.includes(term)) score += 3;
+    });
+
+    LOW_VALUE_TERMS.forEach((term) => {
+        if (lower.includes(term)) score -= 4;
+    });
+
+    return score;
+}
+
+function classifyEvent(text) {
+    const lower = text.toLowerCase();
+    const rules = [
+        ['전쟁/분쟁', ['war', 'battle', 'siege', 'invades', 'invasion', 'massacre', 'revolt', 'rebellion']],
+        ['정치/혁명', ['revolution', 'independence', 'treaty', 'declares', 'elected', 'coup', 'government']],
+        ['과학/기술', ['space', 'launched', 'mission', 'discovered', 'invention', 'nuclear', 'computer']],
+        ['탐험/지리', ['expedition', 'discovers', 'reaches', 'voyage', 'navigation', 'explorer']],
+        ['재난/사건', ['earthquake', 'erupts', 'explodes', 'sinks', 'fire', 'crash', 'disaster']],
+        ['문화/사회', ['opens', 'founded', 'established', 'published', 'broadcast', 'university']]
+    ];
+    const match = rules.find(([, terms]) => terms.some((term) => lower.includes(term)));
+    return match ? match[0] : '흥미로운 사건';
+}
+
+function normalizeRemoteEvents(payload) {
+    const events = payload?.data?.Events || [];
+    const ranked = events
+        .map((event) => ({
+            event,
+            score: getInterestScore(event)
+        }))
+        .filter(({ event, score }) => score >= 3 && cleanText(event.text || '').length >= 45)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 24);
+
+    const selected = ranked.length >= 8 ? ranked : events
+        .map((event) => ({ event, score: getInterestScore(event) }))
+        .filter(({ event }) => cleanText(event.text || '').length >= 45)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 18);
+
+    return selected.map(({ event, score }) => {
+        const text = cleanText(event.text || '');
+        const category = classifyEvent(text);
+        const primaryTitle = event.links?.[0]?.title || text;
+        return {
+            year: event.year,
+            title: primaryTitle,
+            content: text,
+            category,
+            sourceUrl: getPrimaryLink(event),
+            sourceName: 'Wikipedia',
+            interestScore: score
+        };
+    });
+}
+
+async function fetchHistoryFacts(date) {
+    const response = await fetch(`${REMOTE_HISTORY_BASE}/${date.month}/${date.day}`);
+    if (!response.ok) {
+        throw new Error('History API request failed');
+    }
+    const payload = await response.json();
+    activeDateLabel = payload.date || `${date.month}/${date.day}`;
+    const remoteFacts = normalizeRemoteEvents(payload);
+    if (!remoteFacts.length) {
+        throw new Error('No interesting history events found');
+    }
+    return remoteFacts;
+}
+
+function setLoadingState(message) {
+    isLoading = true;
+    newFactBtn.disabled = true;
+    todayFactBtn.disabled = true;
+    factYear.textContent = '불러오는 중';
+    factCategory.textContent = '원격 데이터';
+    factTitle.textContent = message;
+    factContent.textContent = '흥미도가 높은 사건을 선별하고 있습니다.';
+    factSource.hidden = true;
+    factCounter.textContent = '';
+    relatedList.innerHTML = '<p class="empty-state">잠시만 기다려주세요.</p>';
+}
+
+function clearLoadingState() {
+    isLoading = false;
+    newFactBtn.disabled = false;
+    todayFactBtn.disabled = false;
+}
+
+async function loadRemoteFacts(date = getRandomDate()) {
+    if (isLoading) return;
+    setLoadingState('랜덤 날짜의 역사적 사건을 불러오는 중입니다');
+
+    try {
+        facts = await fetchHistoryFacts(date);
+        shownIndices = [];
+        activeCategory = '전체';
+        renderCategoryFilter();
+        displayFact();
+    } catch {
+        facts = FACTS.map((fact) => ({
+            ...fact,
+            sourceUrl: 'https://history.muffinlabs.com/',
+            sourceName: '내장 fallback'
+        }));
+        shownIndices = [];
+        activeCategory = '전체';
+        activeDateLabel = 'fallback';
+        renderCategoryFilter();
+        displayFact();
+        factCounter.textContent += ' · 원격 데이터 연결 실패로 내장 데이터를 표시 중';
+    } finally {
+        clearLoadingState();
+    }
+}
+
 function getFilteredFacts() {
     const query = historySearch.value.trim().toLowerCase();
 
-    return FACTS
+    return facts
         .map((fact, index) => ({ fact, index }))
         .filter(({ fact }) => {
             const matchesCategory = activeCategory === '전체' || fact.category === activeCategory;
-            const searchable = `${fact.year} ${fact.title} ${fact.content} ${fact.category}`.toLowerCase();
+            const searchable = `${fact.year} ${fact.title} ${fact.content} ${fact.category} ${fact.sourceName || ''}`.toLowerCase();
             const matchesSearch = !query || searchable.includes(query);
             return matchesCategory && matchesSearch;
         });
 }
 
 function renderCategoryFilter() {
-    const categories = ['전체', ...new Set(FACTS.map((fact) => fact.category))];
+    const categories = ['전체', ...new Set(facts.map((fact) => fact.category))];
 
     categoryFilter.innerHTML = categories.map((category) => `
         <button class="filter-chip ${category === activeCategory ? 'active' : ''}" type="button" data-category="${category}">
@@ -243,7 +415,7 @@ function renderRelatedFacts(currentIndex) {
 }
 
 function displayFactByIndex(index) {
-    const fact = FACTS[index];
+    const fact = facts[index];
     if (!shownIndices.includes(index)) {
         shownIndices.push(index);
     }
@@ -252,7 +424,10 @@ function displayFactByIndex(index) {
     factCategory.textContent = fact.category;
     factTitle.textContent = fact.title;
     factContent.textContent = fact.content;
-    factCounter.textContent = `${shownIndices.length} / ${FACTS.length}`;
+    factSource.href = fact.sourceUrl;
+    factSource.textContent = `${fact.sourceName || '출처'}에서 원문 보기`;
+    factSource.hidden = false;
+    factCounter.textContent = `${shownIndices.length} / ${facts.length}${activeDateLabel ? ` · ${activeDateLabel}` : ''}`;
     renderRelatedFacts(index);
 }
 
@@ -278,7 +453,8 @@ function displayFact() {
         factCategory.textContent = '검색 결과 없음';
         factTitle.textContent = '조건에 맞는 역사적 사실이 없습니다';
         factContent.textContent = '검색어를 줄이거나 카테고리를 전체로 변경해보세요.';
-        factCounter.textContent = `0 / ${FACTS.length}`;
+        factSource.hidden = true;
+        factCounter.textContent = `0 / ${facts.length}`;
         relatedList.innerHTML = '';
         return;
     }
@@ -287,10 +463,7 @@ function displayFact() {
 }
 
 function displayTodayFact() {
-    const today = new Date();
-    const seed = today.getFullYear() + today.getMonth() + today.getDate();
-    const idx = seed % FACTS.length;
-    displayFactByIndex(idx);
+    loadRemoteFacts(getTodayDate());
 }
 
 categoryFilter.addEventListener('click', function (event) {
@@ -312,7 +485,8 @@ relatedList.addEventListener('click', function (event) {
     displayFactByIndex(Number(button.dataset.index));
 });
 
-newFactBtn.addEventListener('click', displayFact);
+newFactBtn.addEventListener('click', function () {
+    loadRemoteFacts(getRandomDate());
+});
 todayFactBtn.addEventListener('click', displayTodayFact);
-renderCategoryFilter();
-displayFact();
+loadRemoteFacts(getRandomDate());

@@ -39,13 +39,14 @@
                     </div>
                     <h2 class="fact-title" id="factTitle">오늘의 역사적 사실</h2>
                     <p class="fact-content" id="factContent">버튼을 눌러 랜덤 역사적 사실을 확인하세요.</p>
+                    <a class="fact-source" id="factSource" href="https://history.muffinlabs.com/" target="_blank" rel="noopener">출처 보기</a>
                 </div>
                 <p class="fact-counter" id="factCounter"></p>
             </div>
 
             <div class="history-actions">
-                <button id="newFactBtn" class="action-button" type="button">새 사실 뽑기</button>
-                <button id="todayFactBtn" class="secondary-button" type="button">오늘의 관점</button>
+                <button id="newFactBtn" class="action-button" type="button">랜덤 사건 불러오기</button>
+                <button id="todayFactBtn" class="secondary-button" type="button">오늘의 역사</button>
             </div>
 
             <section class="related-facts" aria-labelledby="relatedFactsTitle">
@@ -58,15 +59,15 @@
                 <div class="info-grid">
                     <article class="info-card">
                         <h3>콘텐츠 출처</h3>
-                        <p>수록된 역사적 사실들은 고증된 역사 자료를 바탕으로 정리한 것입니다. 더 깊은 탐구를 위해 관련 서적이나 자료를 찾아보시길 권장합니다.</p>
+                        <p>랜덤 날짜의 공개 역사 이벤트 데이터를 불러온 뒤 사건성이 높은 항목만 골라 보여줍니다. 각 항목은 원문 출처 링크로 확인할 수 있습니다.</p>
                     </article>
                     <article class="info-card">
                         <h3>중복 없는 탐험</h3>
-                        <p>모든 사실을 한 번씩 순환한 뒤 다시 처음부터 랜덤하게 보여줍니다. 같은 세션에서 동일한 사실이 반복되지 않습니다.</p>
+                        <p>단순 출생·사망 기록보다 전쟁, 발견, 발명, 독립, 혁명, 우주, 재난처럼 맥락이 있는 사건을 우선 표시합니다.</p>
                     </article>
                     <article class="info-card">
                         <h3>다양한 카테고리</h3>
-                        <p>고대사, 탐험, 과학, 전쟁, 문화, 우주 등 다양한 분야의 역사적 사실을 수록했습니다. 매번 새로운 분야를 만나보세요.</p>
+                        <p>카테고리와 검색어는 현재 불러온 사건 풀 안에서 작동합니다. 새 랜덤 사건을 불러오면 다른 날짜의 사건 묶음으로 갱신됩니다.</p>
                     </article>
                 </div>
             </section>
@@ -80,7 +81,7 @@
                     </details>
                     <details>
                         <summary>총 몇 가지 사실이 있나요?</summary>
-                        <p>현재 30개 이상의 역사적 사실이 수록되어 있습니다. 앞으로도 지속적으로 추가할 예정입니다.</p>
+                        <p>고정 개수 대신 외부 역사 이벤트 데이터를 실시간으로 불러옵니다. 날짜마다 수십 개의 후보 중 흥미로운 사건만 선별합니다.</p>
                     </details>
                     <details>
                         <summary>같은 사실이 다시 나올 수 있나요?</summary>

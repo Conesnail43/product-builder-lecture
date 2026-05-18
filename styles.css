@@ -1682,6 +1682,57 @@ h1 {
     background: color-mix(in srgb, var(--panel-strong) 88%, transparent);
 }
 
+.access-gate {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.access-gate > div {
+    display: grid;
+    gap: 14px;
+    width: min(430px, 100%);
+    padding: 24px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+    box-shadow: var(--shadow);
+}
+
+.access-gate h1 {
+    font-size: clamp(30px, 7vw, 54px);
+}
+
+.access-gate p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.55;
+}
+
+.access-gate label {
+    display: grid;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.access-gate input {
+    min-height: 50px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel-strong);
+    color: var(--text);
+    padding: 0 12px;
+}
+
+.access-locked .test-protected {
+    display: none;
+}
+
 .growth-entry {
     display: grid;
     gap: 6px;

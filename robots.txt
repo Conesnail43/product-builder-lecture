@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /pet-test.html
 
 Sitemap: https://product-builder-lecture-8bo.pages.dev/sitemap.xml

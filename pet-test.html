@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="description" content="Inner Hatch 테스트 환경 - 하루 제한 없이 여러 선택지를 반복 적용해 아바타 성장 로직을 검증합니다.">
     <title>Inner Hatch 테스트 환경</title>
     <link rel="stylesheet" href="styles.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7454071284445870" crossorigin="anonymous"></script>
 </head>
-<body data-pet-mode="test">
-    <main class="app-shell pet-shell">
+<body data-pet-mode="test" class="access-locked">
+    <section class="access-gate" id="accessGate" aria-labelledby="accessGateTitle">
+        <div>
+            <p class="eyebrow">Private Test</p>
+            <h1 id="accessGateTitle">테스트 환경 접근</h1>
+            <p>이 페이지는 Inner Hatch 검증용입니다. 접근 코드를 입력하면 테스트 도구가 열립니다.</p>
+            <label>
+                <span>Access Code</span>
+                <input id="testAccessCode" type="password" autocomplete="off">
+            </label>
+            <button class="action-button" id="unlockTestBtn" type="button">열기</button>
+            <p class="form-status" id="accessStatus" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <main class="app-shell pet-shell test-protected" aria-hidden="true">
         <div class="page-panel pet-panel">
             <nav class="sub-nav">
                 <a href="pet.html" class="back-link">← 실제 아바타 화면</a>
@@ -112,6 +127,7 @@
             </footer>
         </div>
     </main>
+    <script src="test-access.js"></script>
     <script src="common.js"></script>
     <script src="pet.js"></script>
 </body>

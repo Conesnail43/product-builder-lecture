@@ -1470,6 +1470,18 @@ h1 {
     line-height: 1.7;
 }
 
+.fact-original {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel) 72%, transparent);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.55;
+}
+
 .fact-source {
     display: inline-flex;
     width: fit-content;

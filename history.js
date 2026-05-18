@@ -210,6 +210,7 @@ const factYear = document.getElementById('factYear');
 const factCategory = document.getElementById('factCategory');
 const factTitle = document.getElementById('factTitle');
 const factContent = document.getElementById('factContent');
+const factOriginal = document.getElementById('factOriginal');
 const factSource = document.getElementById('factSource');
 const factCounter = document.getElementById('factCounter');
 const newFactBtn = document.getElementById('newFactBtn');
@@ -280,6 +281,30 @@ function classifyEvent(text) {
     return match ? match[0] : '흥미로운 사건';
 }
 
+function getKoreanEventPhrase(text, category) {
+    const lower = text.toLowerCase();
+    if (category === '전쟁/분쟁') return '전쟁, 충돌, 군사 작전처럼 당시 권력 구도에 영향을 준 사건입니다';
+    if (category === '정치/혁명') return '국가, 제도, 독립, 조약처럼 정치 질서의 변화를 보여주는 사건입니다';
+    if (category === '과학/기술') return '과학 기술의 진전이나 우주·발견·발명과 연결된 사건입니다';
+    if (category === '탐험/지리') return '탐험과 이동, 새로운 지역 인식의 확장을 보여주는 사건입니다';
+    if (category === '재난/사건') return '사회에 큰 충격을 남긴 재난이나 대형 사건입니다';
+    if (category === '문화/사회') return '문화, 교육, 사회 제도의 변화와 연결된 사건입니다';
+    if (lower.includes('first')) return '무언가가 처음으로 기록되거나 시작된 의미 있는 사건입니다';
+    if (lower.includes('end') || lower.includes('falls')) return '한 시대나 체제가 끝나는 흐름을 보여주는 사건입니다';
+    return '단순한 인물 기록보다 역사적 맥락이 뚜렷한 사건입니다';
+}
+
+function buildKoreanTitle(event, category) {
+    const subject = event.links?.[0]?.title;
+    if (subject) return `${event.year}년, ${subject} 관련 ${category}`;
+    return `${event.year}년의 ${category}`;
+}
+
+function buildKoreanContent(event, payload, category) {
+    const subject = event.links?.[0]?.title || '이 사건';
+    return `${payload.date}에 기록된 사건입니다. ${subject}와 관련해 ${getKoreanEventPhrase(event.text || '', category)}. 아래에 영어 원문을 함께 병기했습니다.`;
+}
+
 function normalizeRemoteEvents(payload) {
     const events = payload?.data?.Events || [];
     const ranked = events
@@ -300,11 +325,11 @@ function normalizeRemoteEvents(payload) {
     return selected.map(({ event, score }) => {
         const text = cleanText(event.text || '');
         const category = classifyEvent(text);
-        const primaryTitle = event.links?.[0]?.title || text;
         return {
             year: event.year,
-            title: primaryTitle,
-            content: text,
+            title: buildKoreanTitle(event, category),
+            content: buildKoreanContent(event, payload, category),
+            originalText: text,
             category,
             sourceUrl: getPrimaryLink(event),
             sourceName: 'Wikipedia',
@@ -335,6 +360,8 @@ function setLoadingState(message) {
     factCategory.textContent = '원격 데이터';
     factTitle.textContent = message;
     factContent.textContent = '흥미도가 높은 사건을 선별하고 있습니다.';
+    factOriginal.hidden = true;
+    factOriginal.textContent = '';
     factSource.hidden = true;
     factCounter.textContent = '';
     relatedList.innerHTML = '<p class="empty-state">잠시만 기다려주세요.</p>';
@@ -346,9 +373,9 @@ function clearLoadingState() {
     todayFactBtn.disabled = false;
 }
 
-async function loadRemoteFacts(date = getRandomDate()) {
+async function loadRemoteFacts(date = getRandomDate(), message = '역사적 사건을 불러오는 중입니다') {
     if (isLoading) return;
-    setLoadingState('랜덤 날짜의 역사적 사건을 불러오는 중입니다');
+    setLoadingState(message);
 
     try {
         facts = await fetchHistoryFacts(date);
@@ -380,7 +407,7 @@ function getFilteredFacts() {
         .map((fact, index) => ({ fact, index }))
         .filter(({ fact }) => {
             const matchesCategory = activeCategory === '전체' || fact.category === activeCategory;
-            const searchable = `${fact.year} ${fact.title} ${fact.content} ${fact.category} ${fact.sourceName || ''}`.toLowerCase();
+            const searchable = `${fact.year} ${fact.title} ${fact.content} ${fact.originalText || ''} ${fact.category} ${fact.sourceName || ''}`.toLowerCase();
             const matchesSearch = !query || searchable.includes(query);
             return matchesCategory && matchesSearch;
         });
@@ -424,6 +451,13 @@ function displayFactByIndex(index) {
     factCategory.textContent = fact.category;
     factTitle.textContent = fact.title;
     factContent.textContent = fact.content;
+    if (fact.originalText) {
+        factOriginal.textContent = `영어 원문: ${fact.originalText}`;
+        factOriginal.hidden = false;
+    } else {
+        factOriginal.hidden = true;
+        factOriginal.textContent = '';
+    }
     factSource.href = fact.sourceUrl;
     factSource.textContent = `${fact.sourceName || '출처'}에서 원문 보기`;
     factSource.hidden = false;
@@ -453,6 +487,8 @@ function displayFact() {
         factCategory.textContent = '검색 결과 없음';
         factTitle.textContent = '조건에 맞는 역사적 사실이 없습니다';
         factContent.textContent = '검색어를 줄이거나 카테고리를 전체로 변경해보세요.';
+        factOriginal.hidden = true;
+        factOriginal.textContent = '';
         factSource.hidden = true;
         factCounter.textContent = `0 / ${facts.length}`;
         relatedList.innerHTML = '';
@@ -463,7 +499,7 @@ function displayFact() {
 }
 
 function displayTodayFact() {
-    loadRemoteFacts(getTodayDate());
+    loadRemoteFacts(getTodayDate(), '오늘의 역사적 사건을 불러오는 중입니다');
 }
 
 categoryFilter.addEventListener('click', function (event) {
@@ -486,7 +522,7 @@ relatedList.addEventListener('click', function (event) {
 });
 
 newFactBtn.addEventListener('click', function () {
-    loadRemoteFacts(getRandomDate());
+    loadRemoteFacts(getRandomDate(), '랜덤 날짜의 역사적 사건을 불러오는 중입니다');
 });
 todayFactBtn.addEventListener('click', displayTodayFact);
-loadRemoteFacts(getRandomDate());
+loadRemoteFacts(getTodayDate(), '오늘의 역사적 사건을 불러오는 중입니다');

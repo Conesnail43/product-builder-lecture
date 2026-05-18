@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="로또 번호 추출기 - 1~45 사이 번호를 무작위로 생성합니다. 1게임 또는 5게임을 한번에 뽑을 수 있습니다.">
+    <title>번호 추출기 · Jerry's Test Sandbox</title>
+    <link rel="stylesheet" href="styles.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7454071284445870" crossorigin="anonymous"></script>
+</head>
+<body>
+    <main class="app-shell">
+        <div class="page-panel">
+            <nav class="sub-nav">
+                <a href="index.html" class="back-link">← Jerry's Test Sandbox</a>
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크 모드로 전환">
+                    <span id="themeLabel">Light</span>
+                </button>
+            </nav>
+
+            <header class="page-header">
+                <p class="eyebrow">Lucky Draw</p>
+                <h1>번호 추출기</h1>
+            </header>
+
+            <div class="controls">
+                <label class="switch-control" for="multiGameToggle">
+                    <span class="switch-text">5게임 한번에</span>
+                    <input id="multiGameToggle" type="checkbox">
+                    <span class="switch-track" aria-hidden="true">
+                        <span class="switch-thumb"></span>
+                    </span>
+                </label>
+            </div>
+
+            <div class="tickets" id="tickets" aria-live="polite"></div>
+
+            <button id="generateBtn" class="action-button" type="button">번호 뽑기</button>
+
+            <section class="info-section" aria-labelledby="infoTitle">
+                <h2 id="infoTitle" class="section-title">번호 추출기 안내</h2>
+                <div class="info-grid">
+                    <article class="info-card">
+                        <h3>생성 방식</h3>
+                        <p>1부터 45까지의 숫자를 무작위로 섞은 뒤 6개의 번호와 보너스 번호 1개를 추출합니다.</p>
+                    </article>
+                    <article class="info-card">
+                        <h3>5게임 모드</h3>
+                        <p>동일한 방식의 추첨을 다섯 번 반복해 5개의 게임 세트를 한번에 생성합니다.</p>
+                    </article>
+                    <article class="info-card">
+                        <h3>이용 안내</h3>
+                        <p>이 도구는 무작위 번호 생성기이며, 실제 당첨 가능성을 높여주지 않습니다. 오락 목적으로만 사용해주세요.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="faq-section" aria-labelledby="faqTitle">
+                <h2 id="faqTitle" class="section-title">자주 묻는 질문</h2>
+                <div class="faq-list">
+                    <details>
+                        <summary>번호는 어떻게 생성되나요?</summary>
+                        <p>1~45 배열을 Fisher–Yates 알고리즘으로 무작위 섞은 후 앞에서 7개를 추출합니다. 처음 6개를 오름차순 정렬하여 메인 번호로, 마지막 1개를 보너스 번호로 사용합니다.</p>
+                    </details>
+                    <details>
+                        <summary>같은 번호가 반복 생성될 수 있나요?</summary>
+                        <p>동일한 번호 조합이 나올 수 있습니다. 1~45에서 6개를 뽑는 경우의 수는 약 814만 가지이므로, 동일 조합이 연속으로 나올 확률은 매우 낮습니다.</p>
+                    </details>
+                    <details>
+                        <summary>이 번호로 실제 로또를 사도 되나요?</summary>
+                        <p>물론 가능하지만, 이 생성기는 실제 당첨 확률에 영향을 주지 않습니다. 모든 번호는 동일한 확률로 추출됩니다.</p>
+                    </details>
+                </div>
+            </section>
+
+            <section class="comments-section" aria-labelledby="commentsTitle">
+                <div class="section-heading">
+                    <p class="eyebrow">Comments</p>
+                    <h2 id="commentsTitle">당첨 소식 나누기</h2>
+                </div>
+                <div id="disqus_thread"></div>
+                <p class="disqus-status" id="disqusStatus">댓글 기능을 불러오는 중입니다.</p>
+                <script>
+                    var disqus_config = function () {
+                        this.page.url = window.location.href.split('#')[0];
+                        this.page.identifier = 'lotto-pick-comments';
+                    };
+                    (function() {
+                        var d = document, s = d.createElement('script');
+                        s.src = 'https://test-site-wfuvobj7s9.disqus.com/embed.js';
+                        s.setAttribute('data-timestamp', +new Date());
+                        s.onload = function() {
+                            var status = d.getElementById('disqusStatus');
+                            if (status) status.textContent = '';
+                        };
+                        s.onerror = function() {
+                            var status = d.getElementById('disqusStatus');
+                            if (status) status.textContent = '댓글 기능을 불러오지 못했습니다. 브라우저 차단 설정이나 Disqus 도메인 설정을 확인해주세요.';
+                        };
+                        (d.head || d.body).appendChild(s);
+                    })();
+                </script>
+                <noscript>
+                    JavaScript를 활성화하면 <a href="https://disqus.com/?ref_noscript">Disqus 댓글</a>을 볼 수 있습니다.
+                </noscript>
+            </section>
+
+            <footer class="site-footer">
+                <div class="footer-links">
+                    <a href="index.html">홈</a>
+                    <a href="about.html">소개</a>
+                    <a href="privacy.html">개인정보처리방침</a>
+                </div>
+                <p>Jerry's Test Sandbox · 개인 실험용 웹 도구</p>
+            </footer>
+        </div>
+    </main>
+    <script src="common.js"></script>
+    <script src="lotto.js"></script>
+</body>
+</html>

@@ -1382,6 +1382,12 @@ h1 {
     transform-origin: center;
 }
 
+.avatar-ear,
+.avatar-tail,
+.avatar-foot {
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .16));
+}
+
 .avatar-aura {
     animation: auraPulse 6s ease-in-out infinite;
 }

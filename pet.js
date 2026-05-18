@@ -311,7 +311,7 @@ function completeDaily() {
     const topTag = selected[0].option.tag;
     const deltaSummary = summarizeDeltas(selected);
     pet.dailyAura = getAuraFromTag(topTag);
-    pet.stage = Math.min(4, 1 + Math.floor(pet.log.length / 4));
+    pet.stage = Math.min(4, 1 + Math.floor((pet.log.length + 1) / (IS_TEST_MODE ? 2 : 4)));
     const gained = updateMutations();
     const dominantStat = getDominantStat();
     const dayName = buildEvolutionName(dominantStat, topTag);
@@ -473,8 +473,10 @@ function renderGrowthLog() {
 function renderAvatar(state) {
     const palette = state.core.palette || ELEMENTS.water.palette;
     const body = state.core.body;
+    const primaryElement = state.core.primaryElement || 'water';
     const mutations = state.mutations || [];
     const aura = state.dailyAura || 'mist';
+    const stage = state.stage || 1;
     const shell = mutations.includes('thinShell') || mutations.includes('nestRing');
     const wing = mutations.includes('smallWing');
     const glow = mutations.includes('softGlow') || mutations.includes('innerLamp');
@@ -493,11 +495,16 @@ function renderAvatar(state) {
             </defs>
             ${renderAura(aura, palette, mist)}
             <ellipse cx="130" cy="224" rx="54" ry="12" fill="rgba(0,0,0,.2)"/>
-            ${wing ? renderWings(palette) : ''}
-            ${renderBody(body, shell)}
+            ${renderTail(primaryElement, palette, stage)}
+            ${renderEars(primaryElement, palette, stage)}
+            ${wing || stage >= 3 ? renderWings(palette, stage) : ''}
+            ${renderBody(body, shell, stage)}
+            ${renderFeet(palette, stage)}
+            ${renderElementMark(primaryElement, palette, stage)}
             ${root ? renderRoots() : ''}
             ${glow ? renderGlow() : ''}
-            ${renderEyes(state.core.eyes)}
+            ${renderCheeks(palette, stage)}
+            ${renderEyes(state.core.eyes, stage)}
             ${renderParticles(aura, palette)}
         </svg>
     `;
@@ -518,7 +525,7 @@ function renderAura(aura, palette, mist) {
     `;
 }
 
-function renderBody(body, shell) {
+function renderBody(body, shell, stage) {
     const shapes = {
         seed: '<path class="avatar-body" d="M130 46 C176 68 194 112 174 158 C158 195 121 207 91 185 C62 163 55 121 73 86 C85 63 105 49 130 46Z" fill="url(#petBodyGradient)"/>',
         flame: '<path class="avatar-body" d="M136 42 C172 78 192 106 180 151 C170 188 139 205 106 191 C77 179 61 151 68 120 C74 91 103 80 104 47 C116 56 127 68 136 42Z" fill="url(#petBodyGradient)"/>',
@@ -529,13 +536,86 @@ function renderBody(body, shell) {
     const shellPath = shell
         ? '<path d="M85 95 C108 78 151 78 174 97" fill="none" stroke="rgba(255,255,255,.58)" stroke-width="8" stroke-linecap="round"/><path d="M77 153 C104 178 151 181 177 154" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="6" stroke-linecap="round"/>'
         : '';
-    return `${shapes[body] || shapes.seed}${shellPath}`;
+    const stageBand = stage >= 2
+        ? '<path d="M92 170 C113 188 148 188 169 170" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="7" stroke-linecap="round"/>'
+        : '';
+    return `${shapes[body] || shapes.seed}${stageBand}${shellPath}`;
 }
 
-function renderWings(palette) {
+function renderEars(element, palette, stage) {
+    if (stage < 2) return '';
+    const color = palette[1];
+    const map = {
+        wood: `
+            <path class="avatar-ear" d="M91 73 C72 45 74 27 96 20 C105 45 108 61 104 78Z" fill="${color}"/>
+            <path class="avatar-ear" d="M160 73 C181 45 179 27 157 20 C148 45 145 61 149 78Z" fill="${color}"/>
+        `,
+        fire: `
+            <path class="avatar-ear" d="M94 76 C79 50 86 31 108 19 C111 45 109 62 103 79Z" fill="${color}"/>
+            <path class="avatar-ear" d="M157 76 C172 50 165 31 143 19 C140 45 142 62 148 79Z" fill="${color}"/>
+        `,
+        earth: `
+            <circle class="avatar-ear" cx="88" cy="70" r="21" fill="${color}"/>
+            <circle class="avatar-ear" cx="172" cy="70" r="21" fill="${color}"/>
+        `,
+        metal: `
+            <path class="avatar-ear" d="M84 76 L97 25 L111 76Z" fill="${color}"/>
+            <path class="avatar-ear" d="M149 76 L163 25 L176 76Z" fill="${color}"/>
+        `,
+        water: `
+            <path class="avatar-ear" d="M91 74 C70 54 77 29 103 31 C111 54 107 67 101 80Z" fill="${color}"/>
+            <path class="avatar-ear" d="M160 74 C181 54 174 29 148 31 C140 54 144 67 150 80Z" fill="${color}"/>
+        `
+    };
+    return map[element] || map.water;
+}
+
+function renderTail(element, palette, stage) {
+    if (stage < 2) return '';
+    const color = palette[0];
+    const map = {
+        wood: '<path class="avatar-tail" d="M70 154 C35 140 39 104 72 111 C58 128 63 144 82 152Z" fill="' + color + '" opacity=".72"/>',
+        fire: '<path class="avatar-tail" d="M184 157 C220 139 210 104 184 111 C199 130 198 148 176 160Z" fill="' + color + '" opacity=".72"/>',
+        earth: '<path class="avatar-tail" d="M72 164 C43 164 36 138 60 126 C68 140 80 148 92 154Z" fill="' + color + '" opacity=".7"/>',
+        metal: '<path class="avatar-tail" d="M184 156 L226 138 L187 127Z" fill="' + color + '" opacity=".7"/>',
+        water: '<path class="avatar-tail" d="M72 161 C39 152 47 119 77 124 C62 141 68 153 91 159Z" fill="' + color + '" opacity=".68"/>'
+    };
+    return map[element] || map.water;
+}
+
+function renderWings(palette, stage) {
+    const scale = stage >= 4 ? 1 : .76;
     return `
-        <path class="avatar-wing" d="M78 122 C42 95 41 61 85 70 C93 88 93 106 78 122Z" fill="${palette[1]}" opacity=".58"/>
-        <path class="avatar-wing" d="M182 122 C218 95 219 61 175 70 C167 88 167 106 182 122Z" fill="${palette[1]}" opacity=".58"/>
+        <path class="avatar-wing" d="M78 122 C${42 - 10 * scale} ${95 - 8 * scale} ${41 - 8 * scale} ${61 - 8 * scale} 85 70 C93 88 93 106 78 122Z" fill="${palette[1]}" opacity=".58"/>
+        <path class="avatar-wing" d="M182 122 C${218 + 10 * scale} ${95 - 8 * scale} ${219 + 8 * scale} ${61 - 8 * scale} 175 70 C167 88 167 106 182 122Z" fill="${palette[1]}" opacity=".58"/>
+    `;
+}
+
+function renderFeet(palette, stage) {
+    if (stage < 2) return '';
+    return `
+        <ellipse class="avatar-foot" cx="103" cy="194" rx="18" ry="9" fill="${palette[0]}" opacity=".78"/>
+        <ellipse class="avatar-foot" cx="157" cy="194" rx="18" ry="9" fill="${palette[0]}" opacity=".78"/>
+    `;
+}
+
+function renderElementMark(element, palette, stage) {
+    if (stage < 2) return '';
+    const mark = {
+        wood: '<path d="M130 91 C119 105 119 119 130 133 C142 118 141 105 130 91Z" fill="rgba(255,255,255,.46)"/>',
+        fire: '<path d="M130 91 C145 111 140 131 130 140 C119 128 116 113 130 91Z" fill="rgba(255,255,255,.48)"/>',
+        earth: '<circle cx="130" cy="118" r="18" fill="rgba(255,255,255,.38)"/>',
+        metal: '<path d="M130 94 L151 116 L130 138 L109 116Z" fill="rgba(255,255,255,.42)"/>',
+        water: '<path d="M130 92 C149 114 146 139 130 144 C114 139 111 114 130 92Z" fill="rgba(255,255,255,.42)"/>'
+    };
+    return `${mark[element] || mark.water}<circle cx="130" cy="118" r="5" fill="${palette[2]}" opacity=".86"/>`;
+}
+
+function renderCheeks(palette, stage) {
+    if (stage < 2) return '';
+    return `
+        <circle cx="92" cy="141" r="8" fill="${palette[2]}" opacity=".42"/>
+        <circle cx="168" cy="141" r="8" fill="${palette[2]}" opacity=".42"/>
     `;
 }
 
@@ -550,11 +630,15 @@ function renderGlow() {
     return '<circle class="inner-glow" cx="130" cy="151" r="18" fill="#fff0a8" opacity=".82"/>';
 }
 
-function renderEyes(type) {
+function renderEyes(type, stage) {
     const deep = type === 'deep';
+    const shine = stage >= 3
+        ? '<circle cx="105" cy="119" r="3" fill="#fff"/><circle cx="149" cy="119" r="3" fill="#fff"/>'
+        : '';
     return `
         <ellipse class="avatar-eye" cx="108" cy="124" rx="${deep ? 8 : 10}" ry="${deep ? 12 : 9}" fill="#20242a"/>
         <ellipse class="avatar-eye" cx="152" cy="124" rx="${deep ? 8 : 10}" ry="${deep ? 12 : 9}" fill="#20242a"/>
+        ${shine}
         <path d="M113 158 C123 166 139 166 149 158" fill="none" stroke="#20242a" stroke-width="5" stroke-linecap="round"/>
     `;
 }

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Inner Hatch - 하루의 선택과 상징 레이어가 누적되어 자라는 생성형 아바타 프로토타입입니다.">
+    <title>Inner Hatch · 성장형 아바타</title>
+    <link rel="stylesheet" href="styles.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7454071284445870" crossorigin="anonymous"></script>
+</head>
+<body>
+    <main class="app-shell pet-shell">
+        <div class="page-panel pet-panel">
+            <nav class="sub-nav">
+                <a href="index.html" class="back-link">← Jerry's Test Sandbox</a>
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크 모드로 전환">
+                    <span id="themeLabel">Light</span>
+                </button>
+            </nav>
+
+            <section class="pet-widget" aria-labelledby="petName">
+                <div class="pet-stage">
+                    <div class="pet-day" id="petDay">Day 1</div>
+                    <div id="avatarMount" class="avatar-mount" aria-label="현재 아바타"></div>
+                </div>
+                <div class="pet-summary">
+                    <p class="eyebrow">Inner Hatch</p>
+                    <h1 id="petName">작은 상징 생명체</h1>
+                    <p id="petLine">오늘의 선택을 기다리고 있습니다.</p>
+                    <div class="pet-stats" id="petStats" aria-label="아바타 성장 스탯"></div>
+                </div>
+            </section>
+
+            <section class="onboarding-card" id="onboardingCard" aria-labelledby="onboardingTitle">
+                <p class="eyebrow">First Hatch</p>
+                <h2 id="onboardingTitle">아바타의 첫 리듬을 정해주세요</h2>
+                <div class="onboarding-grid">
+                    <label>
+                        <span>아바타 이름</span>
+                        <input id="avatarNameInput" type="text" maxlength="16" placeholder="예: 물결씨앗">
+                    </label>
+                    <label>
+                        <span>생년월일</span>
+                        <input id="birthDateInput" type="date">
+                    </label>
+                    <label>
+                        <span>태어난 시간</span>
+                        <select id="birthTimeInput">
+                            <option value="unknown">모름</option>
+                            <option value="dawn">새벽</option>
+                            <option value="morning">아침</option>
+                            <option value="day">낮</option>
+                            <option value="evening">저녁</option>
+                            <option value="night">밤</option>
+                        </select>
+                    </label>
+                </div>
+                <button class="action-button" id="createPetBtn" type="button">첫 아바타 만들기</button>
+            </section>
+
+            <section class="daily-card" id="dailyCard" aria-labelledby="dailyTitle" hidden>
+                <div class="section-heading">
+                    <p class="eyebrow">Daily Check-in</p>
+                    <h2 id="dailyTitle">오늘의 작은 선택</h2>
+                </div>
+                <div class="question-stack" id="questionStack"></div>
+                <button class="action-button" id="completeDailyBtn" type="button" disabled>오늘의 진화 보기</button>
+            </section>
+
+            <section class="evolution-card" id="evolutionCard" aria-labelledby="evolutionTitle" hidden>
+                <div class="section-heading">
+                    <p class="eyebrow">Today's Evolution</p>
+                    <h2 id="evolutionTitle">오늘의 진화 흔적</h2>
+                </div>
+                <div class="evolution-result">
+                    <strong id="evolutionName">고요한 물결 씨앗</strong>
+                    <p id="evolutionText">오늘의 선택이 아바타에 작은 흔적으로 남았습니다.</p>
+                    <div class="mutation-list" id="mutationList"></div>
+                </div>
+            </section>
+
+            <section class="growth-log-section" aria-labelledby="growthLogTitle">
+                <div class="section-heading">
+                    <p class="eyebrow">Archive</p>
+                    <h2 id="growthLogTitle">최근 성장 기록</h2>
+                </div>
+                <div class="growth-log" id="growthLog"></div>
+            </section>
+
+            <section class="info-section" aria-labelledby="petInfoTitle">
+                <h2 id="petInfoTitle" class="section-title">프로토타입 안내</h2>
+                <div class="info-grid">
+                    <article class="info-card">
+                        <h3>연속성</h3>
+                        <p>기본 실루엣과 원소는 유지되고, 매일의 선택은 오라, 파츠, 성장 로그로 누적됩니다.</p>
+                    </article>
+                    <article class="info-card">
+                        <h3>상징 레이어</h3>
+                        <p>생월과 시간대는 오행적 색감과 리듬을 정하는 가벼운 상징 재료로만 사용됩니다.</p>
+                    </article>
+                    <article class="info-card">
+                        <h3>비진단형</h3>
+                        <p>정신건강 진단이나 성격 판정이 아니라, 자기이해를 돕는 짧은 성장 경험입니다.</p>
+                    </article>
+                </div>
+            </section>
+
+            <footer class="site-footer">
+                <div class="footer-links">
+                    <a href="index.html">홈</a>
+                    <a href="about.html">소개</a>
+                    <a href="privacy.html">개인정보처리방침</a>
+                </div>
+                <p>Inner Hatch · 하루 1분 성장형 아바타 프로토타입</p>
+            </footer>
+        </div>
+    </main>
+    <script src="common.js"></script>
+    <script src="pet.js"></script>
+</body>
+</html>

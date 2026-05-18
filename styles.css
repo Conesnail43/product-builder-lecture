@@ -574,33 +574,20 @@ h1 {
     font-weight: 700;
 }
 
-.upload-control {
-    display: grid;
-    gap: 8px;
-    padding: 14px;
-    border: 1px dashed var(--line);
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--panel) 72%, transparent);
-    cursor: pointer;
-}
-
-.upload-control.button-like {
-    place-items: center;
-    min-height: 52px;
+.upload-button {
+    width: 100%;
     border-style: solid;
     border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
 }
 
-.upload-control span {
-    color: var(--text);
-    font-weight: 900;
-}
-
-.upload-control input {
+.file-input {
     position: absolute;
     width: 1px;
     height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
     opacity: 0;
+    pointer-events: none;
 }
 
 .reset-button {

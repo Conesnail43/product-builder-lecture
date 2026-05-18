@@ -15,6 +15,7 @@ const stopBtn = document.getElementById('stopBtn');
 const webcamContainer = document.getElementById('webcam-container');
 const cameraPlaceholder = document.getElementById('cameraPlaceholder');
 const previewImage = document.getElementById('previewImage');
+const uploadTrigger = document.getElementById('uploadTrigger');
 const imageUpload = document.getElementById('imageUpload');
 const resetAnimalBtn = document.getElementById('resetAnimalBtn');
 const captureCanvas = document.getElementById('captureCanvas');
@@ -224,13 +225,25 @@ async function handleImageUpload(event) {
     stopTest();
     clearObjectUrl();
     activeObjectUrl = URL.createObjectURL(file);
+    setStatus('업로드한 사진을 준비하는 중입니다...');
     previewImage.onload = async function () {
-        cameraPlaceholder.hidden = true;
-        previewImage.hidden = false;
-        await analyzeImage(previewImage);
+        try {
+            cameraPlaceholder.hidden = true;
+            previewImage.hidden = false;
+            await analyzeImage(previewImage);
+        } catch {
+            setStatus('사진 분석 중 문제가 발생했습니다. 다른 사진으로 다시 시도해주세요.');
+        } finally {
+            previewImage.onload = null;
+            previewImage.onerror = null;
+        }
+    };
+    previewImage.onerror = function () {
+        previewImage.onload = null;
+        previewImage.onerror = null;
+        setStatus('사진을 불러오지 못했습니다. 다른 이미지 파일을 선택해주세요.');
     };
     previewImage.src = activeObjectUrl;
-    setStatus('업로드한 사진을 준비하는 중입니다...');
 }
 
 startBtn.addEventListener('click', startTest);
@@ -238,6 +251,10 @@ captureBtn.addEventListener('click', captureAndAnalyze);
 stopBtn.addEventListener('click', function () {
     stopTest();
     setStatus('카메라가 정지되었습니다.');
+});
+uploadTrigger.addEventListener('click', function () {
+    imageUpload.value = '';
+    imageUpload.click();
 });
 imageUpload.addEventListener('change', handleImageUpload);
 resetAnimalBtn.addEventListener('click', function () {

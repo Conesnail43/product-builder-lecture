@@ -1,4 +1,5 @@
 const MODEL_URL = 'https://teachablemachine.withgoogle.com/models/QUHdMbfcM/';
+const MODEL_VERSION = '2026-05-18T06:52:11.010Z';
 
 let model;
 let webcam;
@@ -88,7 +89,8 @@ async function loadModel() {
     if (model) return;
     if (!window.tmImage) throw new Error('Teachable Machine library is not loaded');
     setStatus('모델을 불러오는 중입니다...');
-    model = await tmImage.load(`${MODEL_URL}model.json`, `${MODEL_URL}metadata.json`);
+    const versionQuery = `?v=${encodeURIComponent(MODEL_VERSION)}`;
+    model = await tmImage.load(`${MODEL_URL}model.json${versionQuery}`, `${MODEL_URL}metadata.json${versionQuery}`);
     maxPredictions = model.getTotalClasses();
 }
 

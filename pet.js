@@ -2,11 +2,11 @@ const STORAGE_KEY = 'inner-hatch-avatar-v1';
 const TODAY_KEY = new Date().toISOString().slice(0, 10);
 
 const ELEMENTS = {
-    wood: { label: '목', palette: ['#2f8f83', '#7bd98e', '#d8f8ce'], body: 'seed' },
-    fire: { label: '화', palette: ['#e9697a', '#ffb15f', '#fff0a8'], body: 'flame' },
-    earth: { label: '토', palette: ['#9a7b43', '#d5b46f', '#f3e2b8'], body: 'stone' },
-    metal: { label: '금', palette: ['#788293', '#c8d3df', '#f5fbff'], body: 'crystal' },
-    water: { label: '수', palette: ['#256b93', '#63c9b9', '#d8fff8'], body: 'drop' }
+    wood: { label: '목', name: '나무', rhythm: '봄의 성장성', palette: ['#2f8f83', '#7bd98e', '#d8f8ce'], body: 'seed' },
+    fire: { label: '화', name: '불', rhythm: '여름의 발산성', palette: ['#e9697a', '#ffb15f', '#fff0a8'], body: 'flame' },
+    earth: { label: '토', name: '흙', rhythm: '전환기의 중심성', palette: ['#9a7b43', '#d5b46f', '#f3e2b8'], body: 'stone' },
+    metal: { label: '금', name: '쇠', rhythm: '가을의 정리성', palette: ['#788293', '#c8d3df', '#f5fbff'], body: 'crystal' },
+    water: { label: '수', name: '물', rhythm: '겨울의 축적성', palette: ['#256b93', '#63c9b9', '#d8fff8'], body: 'drop' }
 };
 
 const QUESTIONS = [
@@ -91,6 +91,7 @@ const avatarMount = document.getElementById('avatarMount');
 const petDay = document.getElementById('petDay');
 const petName = document.getElementById('petName');
 const petLine = document.getElementById('petLine');
+const birthRhythm = document.getElementById('birthRhythm');
 const petStats = document.getElementById('petStats');
 const onboardingCard = document.getElementById('onboardingCard');
 const avatarNameInput = document.getElementById('avatarNameInput');
@@ -113,7 +114,11 @@ let answers = {};
 function loadPet() {
     try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return saved || null;
+        if (!saved) return null;
+        if (saved.core && !saved.core.birthRhythm) {
+            saved.core.birthRhythm = buildBirthRhythm(saved.core.primaryElement || 'water', saved.core.secondaryElement || 'water', 'unknown');
+        }
+        return saved;
     } catch {
         return null;
     }
@@ -159,6 +164,7 @@ function createPet() {
         core: {
             primaryElement,
             secondaryElement,
+            birthRhythm: buildBirthRhythm(primaryElement, secondaryElement, birthTime),
             body: element.body,
             eyes: birthTime === 'night' ? 'deep' : 'soft',
             palette: element.palette
@@ -179,6 +185,20 @@ function createPet() {
     };
     savePet();
     renderApp();
+}
+
+function buildBirthRhythm(primaryElement, secondaryElement, birthTime) {
+    const primary = ELEMENTS[primaryElement];
+    const secondary = ELEMENTS[secondaryElement];
+    const timeLabel = {
+        dawn: '새벽',
+        morning: '아침',
+        day: '낮',
+        evening: '저녁',
+        night: '밤',
+        unknown: '시간 미상'
+    }[birthTime] || '시간 미상';
+    return `${primary.label}${secondary.label} · ${primary.rhythm} + ${timeLabel}의 ${secondary.name} 기운`;
 }
 
 function getDayNumber() {
@@ -374,6 +394,7 @@ function renderEvidence(entry) {
             <div>${topStats}</div>
         </div>
         <ul>${selectedList}</ul>
+        <p class="evidence-note">기본 체질: ${pet.core.birthRhythm || '태어난 리듬 정보 없음'}</p>
         <p class="evidence-note">${STAT_LABELS[entry.dominantStat] || '성장'}은 ${dominant}을 의미합니다.</p>
     `;
 }
@@ -384,11 +405,12 @@ function renderApp() {
         dailyCard.hidden = true;
         evolutionCard.hidden = true;
         renderAvatar({
-            core: { body: 'seed', palette: ELEMENTS.water.palette, eyes: 'soft' },
+            core: { body: 'seed', palette: ELEMENTS.water.palette, eyes: 'soft', birthRhythm: '태어난 리듬을 기다리는 중' },
             mutations: [],
             dailyAura: 'mist',
             stage: 1
         });
+        birthRhythm.textContent = '태어난 리듬을 기다리는 중';
         renderEmptyStats();
         growthLog.innerHTML = '<p class="empty-state">아바타를 만들면 성장 기록이 여기에 쌓입니다.</p>';
         return;
@@ -401,6 +423,7 @@ function renderApp() {
     petLine.textContent = pet.lastCheckIn === TODAY_KEY
         ? '오늘의 선택이 아바타에 작은 흔적으로 남았습니다.'
         : '오늘의 세 가지 선택을 기다리고 있습니다.';
+    birthRhythm.textContent = pet.core.birthRhythm || buildBirthRhythm(pet.core.primaryElement, pet.core.secondaryElement, 'unknown');
     renderAvatar(pet);
     renderStats();
     renderGrowthLog();

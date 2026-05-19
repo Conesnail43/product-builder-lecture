@@ -1,61 +1,83 @@
 const PET_MODE = document.body.dataset.petMode || 'daily';
 const IS_TEST_MODE = PET_MODE === 'test';
-const STORAGE_KEY = IS_TEST_MODE ? 'inner-hatch-avatar-test-v1' : 'inner-hatch-avatar-v1';
+const STORAGE_KEY = IS_TEST_MODE ? 'inner-hatch-avatar-test-v2' : 'inner-hatch-avatar-v2';
+const LEGACY_STORAGE_KEY = IS_TEST_MODE ? 'inner-hatch-avatar-test-v1' : 'inner-hatch-avatar-v1';
 const TODAY_KEY = new Date().toISOString().slice(0, 10);
 
 const ELEMENTS = {
-    wood: { label: '목', name: '나무', rhythm: '봄의 성장성', palette: ['#2f8f83', '#7bd98e', '#d8f8ce'], body: 'seed' },
-    fire: { label: '화', name: '불', rhythm: '여름의 발산성', palette: ['#e9697a', '#ffb15f', '#fff0a8'], body: 'flame' },
-    earth: { label: '토', name: '흙', rhythm: '전환기의 중심성', palette: ['#9a7b43', '#d5b46f', '#f3e2b8'], body: 'stone' },
-    metal: { label: '금', name: '쇠', rhythm: '가을의 정리성', palette: ['#788293', '#c8d3df', '#f5fbff'], body: 'crystal' },
-    water: { label: '수', name: '물', rhythm: '겨울의 축적성', palette: ['#256b93', '#63c9b9', '#d8fff8'], body: 'drop' }
+    wood: { label: '목', name: '나무', rhythm: '봄의 성장성', colors: ['#2f8f83', '#61c77b', '#d8f8ce'], body: 'sprout' },
+    fire: { label: '화', name: '불', rhythm: '여름의 발산성', colors: ['#d94c61', '#ff9a55', '#fff0a8'], body: 'ember' },
+    earth: { label: '토', name: '흙', rhythm: '전환기의 중심성', colors: ['#8c6d3a', '#d0aa62', '#f3e2b8'], body: 'pebble' },
+    metal: { label: '금', name: '쇠', rhythm: '가을의 정리성', colors: ['#687384', '#bfcad7', '#f5fbff'], body: 'crystal' },
+    water: { label: '수', name: '물', rhythm: '겨울의 축적성', colors: ['#236a91', '#5bc6bb', '#d8fff8'], body: 'drop' }
 };
 
-const QUESTIONS = [
+const CARE_ACTIONS = [
     {
-        id: 'changed-plan',
-        text: '오늘 누군가 갑자기 일정을 바꾼다면?',
-        options: [
-            { text: '이유를 듣고 가능한 선에서 조정한다', delta: { empathy: 2, stability: 1 }, mbti: { decision: 1, lifestyle: 1 }, tag: '배려' },
-            { text: '괜찮다고 하지만 내 시간을 다시 정리한다', delta: { boundary: 2, recovery: 1 }, mbti: { energy: -1, decision: -1 }, tag: '경계' },
-            { text: '다음부터는 약속을 더 명확히 잡는다', delta: { responsibility: 2, boundary: 1 }, mbti: { decision: -1, lifestyle: -1 }, tag: '정리' }
-        ]
+        id: 'feed',
+        icon: '◒',
+        name: '먹이 주기',
+        text: '따뜻한 간식을 건네 포만감과 유대를 올립니다.',
+        delta: { empathy: 2, stability: 1 },
+        needs: { hunger: 28, joy: 8, energy: -6, bond: 12 },
+        mbti: { decision: 1, lifestyle: -1 },
+        aura: 'glow',
+        reward: '달콤한 씨앗'
     },
     {
-        id: 'new-thing',
-        text: '작은 새 기회가 생겼을 때 더 가까운 반응은?',
-        options: [
-            { text: '일단 해보고 나중에 조정한다', delta: { exploration: 2, expression: 1 }, mbti: { perception: 1, lifestyle: 1, energy: 1 }, tag: '탐험' },
-            { text: '조건을 확인한 뒤 움직인다', delta: { responsibility: 2, stability: 1 }, mbti: { perception: -1, lifestyle: -1, decision: -1 }, tag: '정돈' },
-            { text: '지금 에너지가 충분한지 먼저 본다', delta: { recovery: 2, boundary: 1 }, mbti: { energy: -1, lifestyle: -1 }, tag: '회복' }
-        ]
+        id: 'play',
+        icon: '✦',
+        name: '놀아주기',
+        text: '작은 놀이로 기분과 표현력이 크게 자랍니다.',
+        delta: { expression: 2, empathy: 1 },
+        needs: { hunger: -8, joy: 28, energy: -14, bond: 10 },
+        mbti: { energy: 1, decision: 1, lifestyle: 1 },
+        aura: 'spark',
+        reward: '반짝 구슬'
     },
     {
-        id: 'emotion',
-        text: '오늘 마음을 누군가에게 보여줘야 한다면?',
-        options: [
-            { text: '있는 그대로 짧게 말한다', delta: { expression: 2, empathy: 1 }, mbti: { energy: 1, decision: 1 }, tag: '표현' },
-            { text: '조금 정리한 뒤 필요한 만큼만 말한다', delta: { boundary: 1, stability: 2 }, mbti: { energy: -1, decision: -1, lifestyle: -1 }, tag: '균형' },
-            { text: '말보다 행동으로 티를 낸다', delta: { responsibility: 1, recovery: 1 }, mbti: { perception: -1, energy: -1 }, tag: '관찰' }
-        ]
+        id: 'train',
+        icon: '◇',
+        name: '훈련하기',
+        text: '짧은 과제로 책임감과 안정감을 쌓습니다.',
+        delta: { responsibility: 2, stability: 2 },
+        needs: { hunger: -10, joy: -4, energy: -18, bond: 5 },
+        mbti: { decision: -1, lifestyle: -1, perception: -1 },
+        aura: 'ring',
+        reward: '단단한 배지'
     },
     {
-        id: 'tired',
-        text: '피로가 느껴지는 날, 가장 필요한 것은?',
-        options: [
-            { text: '혼자 조용히 회복할 시간', delta: { recovery: 3, boundary: 1 }, mbti: { energy: -1, lifestyle: -1 }, tag: '휴식' },
-            { text: '가까운 사람과 짧은 대화', delta: { empathy: 2, expression: 1 }, mbti: { energy: 1, decision: 1 }, tag: '연결' },
-            { text: '작은 일을 하나 끝내는 감각', delta: { responsibility: 2, stability: 1 }, mbti: { decision: -1, lifestyle: -1, perception: -1 }, tag: '완료' }
-        ]
+        id: 'rest',
+        icon: '◌',
+        name: '재우기',
+        text: '조용한 휴식으로 기운을 회복하고 내면이 깊어집니다.',
+        delta: { recovery: 3, boundary: 1 },
+        needs: { hunger: -5, joy: 3, energy: 34, bond: 4 },
+        mbti: { energy: -1, lifestyle: -1 },
+        aura: 'mist',
+        reward: '포근한 담요'
     },
     {
-        id: 'conflict',
-        text: '의견이 다를 때 나는 주로',
-        options: [
-            { text: '상대의 맥락을 먼저 들어본다', delta: { empathy: 3 }, mbti: { decision: 1, perception: 1 }, tag: '공감' },
-            { text: '내 기준을 차분히 설명한다', delta: { boundary: 2, expression: 1 }, mbti: { decision: -1, energy: 1 }, tag: '기준' },
-            { text: '공통 목표를 찾아 정리한다', delta: { stability: 1, responsibility: 2 }, mbti: { decision: -1, lifestyle: -1, perception: 1 }, tag: '중재' }
-        ]
+        id: 'explore',
+        icon: '△',
+        name: '탐험 보내기',
+        text: '낯선 길을 돌아보며 탐험성과 가능성 감각이 자랍니다.',
+        delta: { exploration: 3, expression: 1 },
+        needs: { hunger: -16, joy: 18, energy: -20, bond: 3 },
+        mbti: { perception: 1, lifestyle: 1, energy: 1 },
+        aura: 'flame',
+        reward: '지도 조각'
+    },
+    {
+        id: 'clean',
+        icon: '□',
+        name: '집 정돈',
+        text: '둥지를 정리해 안정감과 경계 감각을 높입니다.',
+        delta: { boundary: 2, responsibility: 1, stability: 1 },
+        needs: { hunger: -4, joy: 6, energy: -8, bond: 8 },
+        mbti: { decision: -1, lifestyle: -1 },
+        aura: 'nest',
+        reward: '깨끗한 둥지'
     }
 ];
 
@@ -69,14 +91,21 @@ const STAT_LABELS = {
     stability: '안정'
 };
 
+const NEED_LABELS = {
+    hunger: '포만',
+    joy: '기분',
+    energy: '기운',
+    bond: '유대'
+};
+
 const STAT_RATIONALE = {
-    empathy: '타인의 감정과 맥락을 고려하는 선택',
-    boundary: '나의 시간, 에너지, 기준을 지키는 선택',
-    exploration: '불확실성 속에서 새 시도를 향하는 선택',
-    expression: '생각이나 감정을 드러내는 선택',
-    responsibility: '약속, 실행, 정리로 이어지는 선택',
-    recovery: '피로를 알아차리고 회복을 우선하는 선택',
-    stability: '상황을 차분히 정돈하고 균형을 만드는 선택'
+    empathy: '돌봄과 관계 반응',
+    boundary: '나와 공간을 지키는 감각',
+    exploration: '새 장소와 가능성으로 향하는 힘',
+    expression: '감정과 신호를 드러내는 힘',
+    responsibility: '반복 행동을 유지하는 힘',
+    recovery: '기운을 회복하는 힘',
+    stability: '둥지를 안정시키는 힘'
 };
 
 const MBTI_AXIS_LABELS = {
@@ -86,14 +115,14 @@ const MBTI_AXIS_LABELS = {
     lifestyle: { positive: 'P 유동 리듬', negative: 'J 정돈 리듬' }
 };
 
-const MUTATIONS = [
-    { id: 'softGlow', label: '부드러운 빛점', stat: 'empathy', threshold: 6 },
-    { id: 'thinShell', label: '얇은 보호 껍질', stat: 'boundary', threshold: 6 },
-    { id: 'smallWing', label: '작은 탐험 날개', stat: 'exploration', threshold: 6 },
-    { id: 'innerLamp', label: '안쪽 등불', stat: 'expression', threshold: 6 },
-    { id: 'rootMark', label: '뿌리 문양', stat: 'responsibility', threshold: 6 },
-    { id: 'mistVeil', label: '회복의 안개', stat: 'recovery', threshold: 6 },
-    { id: 'nestRing', label: '안정의 둥지 고리', stat: 'stability', threshold: 6 }
+const PARTS = [
+    { id: 'ears', label: '작은 귀', stat: 'empathy', threshold: 5 },
+    { id: 'tail', label: '꼬리 파츠', stat: 'exploration', threshold: 5 },
+    { id: 'halo', label: '오라 링', stat: 'stability', threshold: 6 },
+    { id: 'sparkle', label: '반짝 입자', stat: 'expression', threshold: 6 },
+    { id: 'shell', label: '보호 껍질', stat: 'boundary', threshold: 6 },
+    { id: 'badge', label: '훈련 배지', stat: 'responsibility', threshold: 6 },
+    { id: 'pillow', label: '휴식 쿠션', stat: 'recovery', threshold: 6 }
 ];
 
 const avatarMount = document.getElementById('avatarMount');
@@ -102,6 +131,7 @@ const petName = document.getElementById('petName');
 const petLine = document.getElementById('petLine');
 const birthRhythm = document.getElementById('birthRhythm');
 const petStats = document.getElementById('petStats');
+const petMeters = document.getElementById('petMeters');
 const onboardingCard = document.getElementById('onboardingCard');
 const avatarNameInput = document.getElementById('avatarNameInput');
 const birthDateInput = document.getElementById('birthDateInput');
@@ -121,30 +151,60 @@ const runAllTestBtn = document.getElementById('runAllTestBtn');
 const runWeekTestBtn = document.getElementById('runWeekTestBtn');
 
 let pet = loadPet();
-let answers = {};
+let selectedActionId = null;
 
 function loadPet() {
     try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (!saved) return null;
-        if (saved.core && !saved.core.birthRhythm) {
-            saved.core.birthRhythm = buildBirthRhythm(saved.core.primaryElement || 'water', saved.core.secondaryElement || 'water', 'unknown');
-        }
-        if (saved.core && !saved.core.mbti) {
-            saved.core.mbti = buildMbtiProfileFromScores(saved.core.mbtiScores);
-        }
-        if (saved.core && !saved.core.mbtiScores) {
-            saved.core.mbtiScores = saved.core.mbti?.scores || createMbtiScores();
-            saved.core.mbti = buildMbtiProfileFromScores(saved.core.mbtiScores);
-        }
-        return saved;
+        if (saved) return normalizePet(saved);
+        const legacy = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY));
+        return legacy ? migrateLegacyPet(legacy) : null;
     } catch {
         return null;
     }
 }
 
-function savePet() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(pet));
+function normalizePet(saved) {
+    saved.needs = { hunger: 70, joy: 70, energy: 70, bond: 45, ...(saved.needs || {}) };
+    saved.wallet = { xp: 0, coins: 0, streak: 0, ...(saved.wallet || {}) };
+    saved.stats = { empathy: 1, boundary: 1, exploration: 1, expression: 1, responsibility: 1, recovery: 1, stability: 1, ...(saved.stats || {}) };
+    saved.core = saved.core || {};
+    saved.core.primaryElement = saved.core.primaryElement || 'water';
+    saved.core.secondaryElement = saved.core.secondaryElement || 'water';
+    saved.core.birthRhythm = saved.core.birthRhythm || buildBirthRhythm(saved.core.primaryElement, saved.core.secondaryElement, 'unknown');
+    saved.core.mbtiScores = saved.core.mbtiScores || createMbtiScores();
+    saved.core.mbti = buildMbtiProfileFromScores(saved.core.mbtiScores);
+    saved.parts = saved.parts || [];
+    saved.stage = saved.stage || 1;
+    saved.dailyAura = saved.dailyAura || 'mist';
+    saved.log = saved.log || [];
+    return saved;
+}
+
+function migrateLegacyPet(legacy) {
+    const migrated = normalizePet({
+        name: legacy.name || '작은 알',
+        createdAt: legacy.createdAt || TODAY_KEY,
+        lastCheckIn: legacy.lastCheckIn || null,
+        core: legacy.core || {},
+        stats: legacy.stats || {},
+        needs: { hunger: 72, joy: 68, energy: 70, bond: 45 },
+        wallet: { xp: Math.max(0, (legacy.log || []).length * 12), coins: (legacy.log || []).length * 3, streak: 0 },
+        parts: legacy.mutations || [],
+        dailyAura: legacy.dailyAura || 'mist',
+        stage: legacy.stage || 1,
+        log: legacy.log || []
+    });
+    savePet(migrated);
+    return migrated;
+}
+
+function savePet(target = pet) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(target));
+}
+
+function clamp(value, min = 0, max = 100) {
+    return Math.max(min, Math.min(max, value));
 }
 
 function getElementFromBirth(dateString) {
@@ -158,15 +218,14 @@ function getElementFromBirth(dateString) {
 }
 
 function getSecondaryElement(time) {
-    const map = {
+    return {
         dawn: 'wood',
         morning: 'fire',
         day: 'earth',
         evening: 'metal',
         night: 'water',
         unknown: 'water'
-    };
-    return map[time] || 'water';
+    }[time] || 'water';
 }
 
 function createPet() {
@@ -178,7 +237,7 @@ function createPet() {
     const mbtiScores = createMbtiScores();
 
     pet = {
-        name: avatarNameInput.value.trim() || `${element.label}의 씨앗`,
+        name: avatarNameInput.value.trim() || `${element.label}의 알`,
         createdAt: TODAY_KEY,
         lastCheckIn: null,
         core: {
@@ -188,19 +247,12 @@ function createPet() {
             mbtiScores,
             mbti: buildMbtiProfileFromScores(mbtiScores),
             body: element.body,
-            eyes: birthTime === 'night' ? 'deep' : 'soft',
-            palette: element.palette
+            colors: element.colors
         },
-        stats: {
-            empathy: 1,
-            boundary: 1,
-            exploration: 1,
-            expression: 1,
-            responsibility: 1,
-            recovery: 1,
-            stability: 1
-        },
-        mutations: [],
+        stats: { empathy: 1, boundary: 1, exploration: 1, expression: 1, responsibility: 1, recovery: 1, stability: 1 },
+        needs: { hunger: 76, joy: 72, energy: 78, bond: 38 },
+        wallet: { xp: 0, coins: 0, streak: 0 },
+        parts: [],
         dailyAura: 'mist',
         stage: 1,
         log: []
@@ -222,14 +274,7 @@ function buildMbtiProfileFromScores(scores = createMbtiScores()) {
         decision: Math.sign(normalizedScores.decision),
         lifestyle: Math.sign(normalizedScores.lifestyle)
     };
-    if (!hasSignal) {
-        return {
-            type: 'observing',
-            label: '성향 관찰 전',
-            axes,
-            scores: normalizedScores
-        };
-    }
+    if (!hasSignal) return { type: '????', label: '성향 관찰 전', axes, scores: normalizedScores };
     const type = [
         axes.energy === 0 ? '?' : axes.energy > 0 ? 'E' : 'I',
         axes.perception === 0 ? '?' : axes.perception > 0 ? 'N' : 'S',
@@ -241,25 +286,13 @@ function buildMbtiProfileFromScores(scores = createMbtiScores()) {
         if (value === 0) return `${axisLabel.positive.slice(0, 1)}/${axisLabel.negative.slice(0, 1)} 관찰 중`;
         return value > 0 ? axisLabel.positive : axisLabel.negative;
     });
-    return {
-        type,
-        label: `${type} 경향 · ${labels.join(' · ')}`,
-        axes,
-        scores: normalizedScores
-    };
+    return { type, label: `${type} 경향 · ${labels.join(' · ')}`, axes, scores: normalizedScores };
 }
 
 function buildBirthRhythm(primaryElement, secondaryElement, birthTime) {
     const primary = ELEMENTS[primaryElement];
     const secondary = ELEMENTS[secondaryElement];
-    const timeLabel = {
-        dawn: '새벽',
-        morning: '아침',
-        day: '낮',
-        evening: '저녁',
-        night: '밤',
-        unknown: '시간 미상'
-    }[birthTime] || '시간 미상';
+    const timeLabel = { dawn: '새벽', morning: '아침', day: '낮', evening: '저녁', night: '밤', unknown: '시간 미상' }[birthTime] || '시간 미상';
     return `${primary.label}${secondary.label} · ${primary.rhythm} + ${timeLabel}의 ${secondary.name} 기운`;
 }
 
@@ -267,187 +300,139 @@ function getDayNumber() {
     if (!pet) return 1;
     const start = new Date(pet.createdAt);
     const today = new Date(TODAY_KEY);
-    const diff = Math.max(0, today - start);
-    return Math.floor(diff / 86400000) + 1;
+    return Math.floor(Math.max(0, today - start) / 86400000) + 1;
 }
 
-function getDailyQuestions() {
-    if (IS_TEST_MODE) return QUESTIONS;
+function getAvailableActions() {
+    if (IS_TEST_MODE) return CARE_ACTIONS;
     const seed = TODAY_KEY.split('-').reduce((sum, part) => sum + Number(part), 0);
-    return [0, 1, 2].map((offset) => QUESTIONS[(seed + offset) % QUESTIONS.length]);
+    return [0, 1, 2].map((offset) => CARE_ACTIONS[(seed + offset) % CARE_ACTIONS.length]);
 }
 
-function renderQuestions() {
-    answers = {};
-    const questions = getDailyQuestions();
-    questionStack.innerHTML = questions.map((question, questionIndex) => `
-        <article class="question-card" data-question="${question.id}">
-            <h3>${questionIndex + 1}. ${question.text}</h3>
-            <div class="answer-grid">
-                ${question.options.map((option, optionIndex) => `
-                    <button class="answer-option" type="button" data-question="${question.id}" data-option="${optionIndex}">
-                        <strong>${option.text}</strong>
-                        <span>${formatDelta(option.delta)}</span>
-                    </button>
-                `).join('')}
-            </div>
-        </article>
-    `).join('');
+function renderActions() {
+    selectedActionId = null;
+    const actions = getAvailableActions();
+    questionStack.innerHTML = `
+        <div class="care-grid">
+            ${actions.map((action) => `
+                <button class="care-action" type="button" data-action="${action.id}">
+                    <span class="care-icon">${action.icon}</span>
+                    <strong>${action.name}</strong>
+                    <small>${action.text}</small>
+                    <em>${formatNeeds(action.needs)}</em>
+                </button>
+            `).join('')}
+        </div>
+    `;
     completeDailyBtn.disabled = true;
 }
 
-function formatDelta(delta) {
-    return Object.entries(delta)
-        .map(([stat, value]) => `${STAT_LABELS[stat]} +${value}`)
+function formatNeeds(needs) {
+    return Object.entries(needs)
+        .filter(([, value]) => value !== 0)
+        .map(([need, value]) => `${NEED_LABELS[need]} ${value > 0 ? '+' : ''}${value}`)
         .join(' · ');
 }
 
-function applyAnswerDeltas(selected) {
-    selected.forEach(({ option }) => {
-        Object.entries(option.delta).forEach(([stat, value]) => {
-            pet.stats[stat] = (pet.stats[stat] || 0) + value;
-        });
+function applyCareAction(action) {
+    Object.entries(action.delta).forEach(([stat, value]) => {
+        pet.stats[stat] = (pet.stats[stat] || 0) + value;
     });
-}
-
-function applyMbtiSignals(selected) {
+    Object.entries(action.needs).forEach(([need, value]) => {
+        pet.needs[need] = clamp((pet.needs[need] || 0) + value);
+    });
     pet.core.mbtiScores = pet.core.mbtiScores || createMbtiScores();
-    selected.forEach(({ option }) => {
-        Object.entries(option.mbti || {}).forEach(([axis, value]) => {
-            pet.core.mbtiScores[axis] = (pet.core.mbtiScores[axis] || 0) + value;
-        });
+    Object.entries(action.mbti || {}).forEach(([axis, value]) => {
+        pet.core.mbtiScores[axis] = (pet.core.mbtiScores[axis] || 0) + value;
     });
     pet.core.mbti = buildMbtiProfileFromScores(pet.core.mbtiScores);
+    pet.wallet.xp += 14 + Math.max(0, Math.round((pet.needs.bond - 40) / 12));
+    pet.wallet.coins += 3 + (action.id === 'explore' ? 2 : 0);
+    pet.wallet.streak = IS_TEST_MODE ? pet.wallet.streak + 1 : getNextStreak();
+    pet.dailyAura = action.aura;
+}
+
+function getNextStreak() {
+    if (!pet.lastCheckIn) return 1;
+    const last = new Date(pet.lastCheckIn);
+    const today = new Date(TODAY_KEY);
+    const diff = Math.round((today - last) / 86400000);
+    return diff === 1 ? (pet.wallet.streak || 0) + 1 : 1;
+}
+
+function updateStage() {
+    const xpStage = Math.min(5, 1 + Math.floor(pet.wallet.xp / 42));
+    const logStage = Math.min(5, 1 + Math.floor((pet.log.length + 1) / (IS_TEST_MODE ? 3 : 5)));
+    pet.stage = Math.max(pet.stage || 1, xpStage, logStage);
+}
+
+function unlockParts() {
+    const gained = [];
+    PARTS.forEach((part) => {
+        if ((pet.stats[part.stat] || 0) >= part.threshold && !pet.parts.includes(part.id)) {
+            pet.parts.push(part.id);
+            gained.push(part.label);
+        }
+    });
+    if (pet.stage >= 3 && !pet.parts.includes('feet')) {
+        pet.parts.push('feet');
+        gained.push('작은 발');
+    }
+    if (pet.stage >= 4 && !pet.parts.includes('crown')) {
+        pet.parts.push('crown');
+        gained.push('성장 왕관');
+    }
+    return gained;
 }
 
 function getDominantStat() {
     return Object.entries(pet.stats).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-function updateMutations() {
-    const gained = [];
-    MUTATIONS.forEach((mutation) => {
-        if (pet.stats[mutation.stat] >= mutation.threshold && !pet.mutations.includes(mutation.id)) {
-            pet.mutations.push(mutation.id);
-            gained.push(mutation.label);
-        }
-    });
-    return gained;
-}
-
-function summarizeDeltas(selected) {
-    return selected.reduce((totals, { option }) => {
-        Object.entries(option.delta).forEach(([stat, value]) => {
-            totals[stat] = (totals[stat] || 0) + value;
-        });
-        return totals;
-    }, {});
-}
-
-function getAuraFromTag(tag) {
-    const map = {
-        배려: 'glow',
-        공감: 'glow',
-        경계: 'ring',
-        기준: 'ring',
-        탐험: 'spark',
-        표현: 'flame',
-        휴식: 'mist',
-        회복: 'mist',
-        안정: 'nest',
-        정돈: 'nest',
-        완료: 'nest'
-    };
-    return map[tag] || 'mist';
-}
-
 function completeDaily() {
     if (!pet || (!IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY)) return;
-    const questions = getDailyQuestions();
-    const selected = questions.map((question) => {
-        const optionIndex = answers[question.id];
-        return {
-            question,
-            option: question.options[optionIndex]
-        };
-    });
+    const action = CARE_ACTIONS.find((item) => item.id === selectedActionId);
+    if (!action) return;
 
-    if (selected.some(({ option }) => !option)) return;
-
-    applyAnswerDeltas(selected);
-    applyMbtiSignals(selected);
-    const topTag = selected[0].option.tag;
-    const deltaSummary = summarizeDeltas(selected);
-    pet.dailyAura = getAuraFromTag(topTag);
-    pet.stage = Math.min(4, 1 + Math.floor((pet.log.length + 1) / (IS_TEST_MODE ? 2 : 4)));
-    const gained = updateMutations();
+    applyCareAction(action);
+    updateStage();
+    const gained = unlockParts();
     const dominantStat = getDominantStat();
-    const dayName = buildEvolutionName(dominantStat, topTag);
-
+    const mood = getMood();
     const entry = {
         date: IS_TEST_MODE ? `Test ${pet.log.length + 1}` : TODAY_KEY,
-        name: dayName,
-        text: `${STAT_LABELS[dominantStat]}의 흐름이 가장 크게 자랐습니다. 오늘의 ${topTag} 선택은 ${pet.name}에게 새로운 흔적으로 남았습니다.`,
-        evidence: selected.map(({ question, option }) => ({
-            question: question.text,
-            answer: option.text,
-            delta: option.delta,
-            mbti: option.mbti || {},
-            tag: option.tag
-        })),
-        deltaSummary,
-        mbtiSummary: summarizeMbtiSignals(selected),
+        name: buildCareResultName(action, dominantStat),
+        text: `${action.name}로 ${pet.name}의 ${NEED_LABELS[mood.need]} 상태가 ${mood.label} 쪽으로 움직였습니다. ${action.reward}을 얻었습니다.`,
+        action: action.name,
+        delta: action.delta,
+        needs: action.needs,
+        mbtiSummary: action.mbti,
         dominantStat,
         gained,
-        aura: pet.dailyAura
+        reward: action.reward,
+        aura: action.aura,
+        stage: pet.stage
     };
 
     pet.log.unshift(entry);
-    pet.log = pet.log.slice(0, 14);
+    pet.log = pet.log.slice(0, 21);
     pet.lastCheckIn = IS_TEST_MODE ? null : TODAY_KEY;
     savePet();
     renderApp();
     showEvolution(entry);
 }
 
-function summarizeMbtiSignals(selected) {
-    return selected.reduce((totals, { option }) => {
-        Object.entries(option.mbti || {}).forEach(([axis, value]) => {
-            totals[axis] = (totals[axis] || 0) + value;
-        });
-        return totals;
-    }, {});
+function buildCareResultName(action, stat) {
+    const stageName = ['알', '꼬마', '방랑', '수호', '성체'][Math.max(0, pet.stage - 1)] || '성체';
+    return `${STAT_LABELS[stat]} ${stageName} · ${action.reward}`;
 }
 
-function buildEvolutionName(stat, tag) {
-    const adjectives = {
-        empathy: '따뜻한',
-        boundary: '투명한',
-        exploration: '별을 좇는',
-        expression: '빛나는',
-        responsibility: '뿌리 깊은',
-        recovery: '안개 낀',
-        stability: '고요한'
-    };
-    const forms = {
-        glow: '등불',
-        ring: '유리껍질',
-        spark: '별가루',
-        flame: '작은 불씨',
-        mist: '물결',
-        nest: '둥지'
-    };
-    return `${adjectives[stat] || '작은'} ${forms[pet.dailyAura] || tag} ${getBodyLabel(pet.core.body)}`;
-}
-
-function getBodyLabel(body) {
-    return {
-        seed: '씨앗',
-        flame: '불씨',
-        stone: '돌알',
-        crystal: '결정',
-        drop: '물방울'
-    }[body] || '생명체';
+function getMood() {
+    const entries = Object.entries(pet.needs).sort((a, b) => a[1] - b[1]);
+    const [need, value] = entries[0];
+    if (value < 35) return { need, label: '부족함' };
+    if (value > 78) return { need, label: '충만함' };
+    return { need: 'bond', label: '안정됨' };
 }
 
 function showEvolution(entry) {
@@ -456,53 +441,41 @@ function showEvolution(entry) {
     evolutionText.textContent = entry.text;
     renderEvidence(entry);
     mutationList.innerHTML = entry.gained.length
-        ? entry.gained.map((item) => `<span>${item} 획득</span>`).join('')
-        : '<span>오늘의 오라가 변화했습니다</span>';
+        ? entry.gained.map((item) => `<span>${item} 해금</span>`).join('')
+        : `<span>${entry.reward} 획득</span><span>코인 +${entry.action === '탐험 보내기' ? 5 : 3}</span>`;
 }
 
 function renderEvidence(entry) {
-    const deltas = entry.deltaSummary || {};
-    const mbtiSignals = entry.mbtiSummary || {};
-    const evidence = entry.evidence || [];
-    const topStats = Object.entries(deltas)
-        .sort((a, b) => b[1] - a[1])
-        .map(([stat, value]) => `<span>${STAT_LABELS[stat]} +${value}</span>`)
-        .join('');
-    const mbtiTags = Object.entries(mbtiSignals)
-        .filter(([, value]) => value !== 0)
+    const statTags = Object.entries(entry.delta || {}).map(([stat, value]) => `<span>${STAT_LABELS[stat]} +${value}</span>`).join('');
+    const needTags = Object.entries(entry.needs || {}).map(([need, value]) => `<span>${NEED_LABELS[need]} ${value > 0 ? '+' : ''}${value}</span>`).join('');
+    const mbtiTags = Object.entries(entry.mbtiSummary || {})
         .map(([axis, value]) => `<span>${formatMbtiSignal(axis, value)}</span>`)
         .join('');
-    const selectedList = evidence.map((item) => `
-        <li>
-            <strong>${item.tag}</strong>
-            <span>${item.answer}</span>
-        </li>
-    `).join('');
-    const dominant = entry.dominantStat ? STAT_RATIONALE[entry.dominantStat] : '오늘 선택에서 가장 크게 자란 축';
 
     evidencePanel.innerHTML = `
         <div class="evidence-summary">
-            <p>오늘의 근거</p>
-            <div>${topStats}</div>
+            <p>게임 보상</p>
+            <div><span>${entry.reward}</span><span>XP +14</span><span>연속 ${pet.wallet.streak}일</span></div>
         </div>
-        ${mbtiTags ? `
-            <div class="evidence-summary">
-                <p>성향 관찰</p>
-                <div>${mbtiTags}</div>
-            </div>
-        ` : ''}
-        <ul>${selectedList}</ul>
-        <p class="evidence-note">기본 체질: ${pet.core.birthRhythm || '태어난 리듬 정보 없음'}</p>
-        <p class="evidence-note">현재 성향: ${pet.core.mbti?.label || '성향 관찰 전'}</p>
-        <p class="evidence-note">${STAT_LABELS[entry.dominantStat] || '성장'}은 ${dominant}을 의미합니다.</p>
+        <div class="evidence-summary">
+            <p>상태 변화</p>
+            <div>${needTags}</div>
+        </div>
+        <div class="evidence-summary">
+            <p>성장 축</p>
+            <div>${statTags}</div>
+        </div>
+        ${mbtiTags ? `<div class="evidence-summary"><p>성향 관찰</p><div>${mbtiTags}</div></div>` : ''}
+        <p class="evidence-note">기본 체질: ${pet.core.birthRhythm}</p>
+        <p class="evidence-note">현재 성향: ${pet.core.mbti.label}</p>
+        <p class="evidence-note">${STAT_LABELS[entry.dominantStat]}은 ${STAT_RATIONALE[entry.dominantStat]}을 의미합니다.</p>
     `;
 }
 
 function formatMbtiSignal(axis, value) {
     const labels = MBTI_AXIS_LABELS[axis];
     if (!labels) return `${axis} ${value > 0 ? '+' : ''}${value}`;
-    const label = value > 0 ? labels.positive : labels.negative;
-    return `${label} ${value > 0 ? '+' : ''}${value}`;
+    return `${value > 0 ? labels.positive : labels.negative} ${value > 0 ? '+' : ''}${value}`;
 }
 
 function renderApp() {
@@ -510,283 +483,246 @@ function renderApp() {
         onboardingCard.hidden = false;
         dailyCard.hidden = true;
         evolutionCard.hidden = true;
-        renderAvatar({
-            core: { body: 'seed', palette: ELEMENTS.water.palette, eyes: 'soft', birthRhythm: '태어난 리듬을 기다리는 중' },
-            mutations: [],
-            dailyAura: 'mist',
-            stage: 1
+        renderPixelAvatar({
+            core: { primaryElement: 'water', secondaryElement: 'water', colors: ELEMENTS.water.colors },
+            needs: { hunger: 70, joy: 70, energy: 70, bond: 40 },
+            parts: [],
+            stage: 1,
+            dailyAura: 'mist'
         });
         birthRhythm.textContent = '태어난 리듬을 기다리는 중';
         renderEmptyStats();
-        growthLog.innerHTML = '<p class="empty-state">아바타를 만들면 성장 기록이 여기에 쌓입니다.</p>';
+        renderEmptyMeters();
+        growthLog.innerHTML = '<p class="empty-state">첫 알을 부화시키면 돌봄 기록이 여기에 쌓입니다.</p>';
         return;
     }
 
     onboardingCard.hidden = true;
     dailyCard.hidden = !IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY;
-    petDay.textContent = `Day ${getDayNumber()}`;
+    petDay.textContent = `Day ${getDayNumber()} · Lv.${pet.stage}`;
     petName.textContent = pet.name;
-    petLine.textContent = !IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY
-        ? '오늘의 선택이 아바타에 작은 흔적으로 남았습니다.'
-        : '오늘의 세 가지 선택을 기다리고 있습니다.';
-    const mbtiLabel = pet.core.mbti?.label || '성향 관찰 전';
-    birthRhythm.textContent = `${pet.core.birthRhythm || buildBirthRhythm(pet.core.primaryElement, pet.core.secondaryElement, 'unknown')} · ${mbtiLabel}`;
-    renderAvatar(pet);
+    petLine.textContent = buildPetLine();
+    birthRhythm.textContent = `${pet.core.birthRhythm} · ${pet.core.mbti.label}`;
+    renderPixelAvatar(pet);
     renderStats();
+    renderMeters();
     renderGrowthLog();
 
     if (IS_TEST_MODE || pet.lastCheckIn !== TODAY_KEY) {
-        renderQuestions();
+        renderActions();
     } else if (pet.log[0]) {
         showEvolution(pet.log[0]);
     }
 }
 
+function buildPetLine() {
+    const mood = getMood();
+    if (!IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY) return `오늘은 이미 돌봤습니다. ${NEED_LABELS[mood.need]} 상태가 ${mood.label}입니다.`;
+    return `${NEED_LABELS[mood.need]} 상태가 ${mood.label}입니다. 오늘 한 번 돌봐주세요.`;
+}
+
 function renderEmptyStats() {
-    petStats.innerHTML = Object.values(STAT_LABELS).slice(0, 4).map((label) => `
-        <span>${label}<strong>0</strong></span>
-    `).join('');
+    petStats.innerHTML = ['Lv', 'XP', '코인', '연속'].map((label) => `<span>${label}<strong>0</strong></span>`).join('');
 }
 
 function renderStats() {
-    const topStats = Object.entries(pet.stats).sort((a, b) => b[1] - a[1]).slice(0, 4);
-    petStats.innerHTML = topStats.map(([stat, value]) => `
-        <span>${STAT_LABELS[stat]}<strong>${value}</strong></span>
+    petStats.innerHTML = `
+        <span>Lv<strong>${pet.stage}</strong></span>
+        <span>XP<strong>${pet.wallet.xp}</strong></span>
+        <span>코인<strong>${pet.wallet.coins}</strong></span>
+        <span>연속<strong>${pet.wallet.streak}</strong></span>
+    `;
+}
+
+function renderEmptyMeters() {
+    if (!petMeters) return;
+    petMeters.innerHTML = Object.values(NEED_LABELS).map((label) => `
+        <div class="pet-meter"><span>${label}</span><i><b style="width:0%"></b></i><strong>0</strong></div>
+    `).join('');
+}
+
+function renderMeters() {
+    if (!petMeters) return;
+    petMeters.innerHTML = Object.entries(pet.needs).map(([need, value]) => `
+        <div class="pet-meter">
+            <span>${NEED_LABELS[need]}</span>
+            <i><b style="width:${clamp(value)}%"></b></i>
+            <strong>${clamp(value)}</strong>
+        </div>
     `).join('');
 }
 
 function renderGrowthLog() {
     if (!pet.log.length) {
-        growthLog.innerHTML = '<p class="empty-state">첫 체크인을 완료하면 오늘의 진화 카드가 저장됩니다.</p>';
+        growthLog.innerHTML = '<p class="empty-state">첫 돌봄을 완료하면 보상과 파츠 기록이 저장됩니다.</p>';
         return;
     }
-    growthLog.innerHTML = pet.log.slice(0, 7).map((entry) => `
+    growthLog.innerHTML = pet.log.slice(0, 8).map((entry) => `
         <article class="growth-entry">
-            <span>${entry.date}</span>
+            <span>${entry.date} · Lv.${entry.stage || pet.stage}</span>
             <strong>${entry.name}</strong>
             <p>${entry.text}</p>
         </article>
     `).join('');
 }
 
-function renderAvatar(state) {
-    const palette = state.core.palette || ELEMENTS.water.palette;
-    const body = state.core.body;
-    const primaryElement = state.core.primaryElement || 'water';
-    const mbti = state.core.mbti || buildMbtiProfileFromScores(state.core.mbtiScores);
-    const mutations = state.mutations || [];
-    const aura = state.dailyAura || 'mist';
-    const stage = state.stage || 1;
-    const shell = mutations.includes('thinShell') || mutations.includes('nestRing');
-    const wing = mutations.includes('smallWing');
-    const glow = mutations.includes('softGlow') || mutations.includes('innerLamp');
-    const root = mutations.includes('rootMark');
-    const mist = mutations.includes('mistVeil') || aura === 'mist';
-
-    avatarMount.innerHTML = `
-        <svg class="generated-avatar" viewBox="0 0 260 260" role="img">
-            <defs>
-                <radialGradient id="petBodyGradient" cx="42%" cy="30%" r="72%">
-                    <stop offset="0%" stop-color="${palette[2]}"/>
-                    <stop offset="58%" stop-color="${palette[1]}"/>
-                    <stop offset="100%" stop-color="${palette[0]}"/>
-                </radialGradient>
-                <filter id="softBlur"><feGaussianBlur stdDeviation="8"/></filter>
-            </defs>
-            ${renderAura(aura, palette, mist)}
-            <ellipse cx="130" cy="224" rx="54" ry="12" fill="rgba(0,0,0,.2)"/>
-            ${renderTail(primaryElement, palette, stage)}
-            ${renderEars(primaryElement, palette, stage)}
-            ${wing || stage >= 3 ? renderWings(palette, stage) : ''}
-            ${renderBody(body, shell, stage)}
-            ${renderFeet(palette, stage)}
-            ${renderElementMark(primaryElement, palette, stage)}
-            ${renderMbtiTraits(mbti, palette, stage)}
-            ${root ? renderRoots() : ''}
-            ${glow ? renderGlow() : ''}
-            ${renderCheeks(palette, stage)}
-            ${renderEyes(state.core.eyes, stage)}
-            ${renderParticles(aura, palette)}
-        </svg>
-    `;
+function renderPixelAvatar(state) {
+    avatarMount.innerHTML = '<canvas class="pixel-avatar" width="160" height="160" aria-label="도트 아바타"></canvas>';
+    const canvas = avatarMount.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    const colors = state.core.colors || ELEMENTS[state.core.primaryElement || 'water'].colors;
+    const element = state.core.primaryElement || 'water';
+    const parts = state.parts || [];
+    ctx.imageSmoothingEnabled = false;
+    drawBackground(ctx, state.dailyAura || 'mist', colors);
+    drawShadow(ctx);
+    drawTail(ctx, element, parts, colors, state.stage || 1);
+    drawBody(ctx, element, colors, state.stage || 1, parts);
+    drawEars(ctx, element, parts, colors, state.stage || 1);
+    drawFace(ctx, getMoodForState(state), state.stage || 1);
+    drawAccessories(ctx, state, colors);
 }
 
-function renderMbtiTraits(mbti, palette, stage) {
-    if (!mbti || !Object.values(mbti.axes || {}).some((value) => value !== 0)) return '';
-    const axes = mbti.axes || {};
-    const energy = axes.energy > 0
-        ? '<circle class="mbti-pulse" cx="58" cy="103" r="6" fill="' + palette[2] + '"/><circle class="mbti-pulse" cx="202" cy="103" r="6" fill="' + palette[2] + '"/>'
-        : axes.energy < 0
-            ? '<path d="M88 104 C99 91 116 86 130 87 C113 96 101 107 95 122Z" fill="rgba(32,36,42,.18)"/>'
-            : '';
-    const perception = axes.perception > 0
-        ? '<path d="M130 62 L136 75 L150 76 L139 85 L142 99 L130 91 L118 99 L121 85 L110 76 L124 75Z" fill="' + palette[2] + '" opacity=".78"/>'
-        : axes.perception < 0
-            ? '<path d="M96 181 L112 176 L128 181 L144 176 L160 181" fill="none" stroke="' + palette[2] + '" stroke-width="4" stroke-linecap="round" opacity=".72"/>'
-            : '';
-    const decision = axes.decision > 0
-        ? '<circle cx="82" cy="132" r="6" fill="#ff9fb0" opacity=".72"/><circle cx="178" cy="132" r="6" fill="#ff9fb0" opacity=".72"/>'
-        : axes.decision < 0
-            ? '<path d="M105 91 L155 91" stroke="rgba(255,255,255,.62)" stroke-width="5" stroke-linecap="round"/>'
-            : '';
-    const lifestyle = axes.lifestyle > 0
-        ? '<path d="M71 188 C89 203 111 203 128 190 C145 177 168 177 189 190" fill="none" stroke="' + palette[1] + '" stroke-width="4" stroke-linecap="round" opacity=".65"/>'
-        : axes.lifestyle < 0
-            ? '<circle cx="130" cy="205" r="34" fill="none" stroke="' + palette[1] + '" stroke-width="4" opacity=".5"/>'
-            : '';
-    return `<g class="mbti-traits" opacity="${stage >= 2 ? '.95' : '.62'}">${energy}${perception}${decision}${lifestyle}</g>`;
+function drawPixel(ctx, x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
 }
 
-function renderAura(aura, palette, mist) {
-    const colors = {
-        glow: palette[1],
-        ring: palette[2],
-        spark: '#f4c978',
-        flame: '#ff9b6b',
-        nest: '#d5b46f',
-        mist: palette[1]
-    };
-    return `
-        <circle class="avatar-aura" cx="130" cy="128" r="94" fill="${colors[aura] || palette[1]}" opacity="${mist ? '0.2' : '0.28'}" filter="url(#softBlur)"/>
-        <circle cx="130" cy="128" r="108" fill="none" stroke="${colors[aura] || palette[1]}" stroke-width="2" opacity="0.22"/>
-    `;
+function drawBackground(ctx, aura, colors) {
+    ctx.fillStyle = '#f8fbff';
+    ctx.fillRect(0, 0, 160, 160);
+    const auraColor = { glow: '#ffe9a8', spark: '#e8dcff', ring: '#e4f0ff', mist: '#dff8ff', flame: '#ffe0c8', nest: '#efe4c2' }[aura] || colors[2];
+    for (let y = 0; y < 160; y += 8) {
+        for (let x = 0; x < 160; x += 8) {
+            if ((x + y) % 24 === 0) drawPixel(ctx, x, y, 8, 8, auraColor);
+        }
+    }
+    drawPixel(ctx, 16, 18, 10, 10, colors[2]);
+    drawPixel(ctx, 132, 30, 8, 8, colors[1]);
+    drawPixel(ctx, 26, 122, 8, 8, colors[1]);
 }
 
-function renderBody(body, shell, stage) {
-    const shapes = {
-        seed: '<path class="avatar-body" d="M130 46 C176 68 194 112 174 158 C158 195 121 207 91 185 C62 163 55 121 73 86 C85 63 105 49 130 46Z" fill="url(#petBodyGradient)"/>',
-        flame: '<path class="avatar-body" d="M136 42 C172 78 192 106 180 151 C170 188 139 205 106 191 C77 179 61 151 68 120 C74 91 103 80 104 47 C116 56 127 68 136 42Z" fill="url(#petBodyGradient)"/>',
-        stone: '<path class="avatar-body" d="M78 91 C98 57 149 50 180 82 C208 111 194 169 154 192 C121 211 74 191 62 152 C55 129 62 107 78 91Z" fill="url(#petBodyGradient)"/>',
-        crystal: '<path class="avatar-body" d="M130 42 L181 89 L166 170 L130 203 L94 170 L79 89 Z" fill="url(#petBodyGradient)"/>',
-        drop: '<path class="avatar-body" d="M130 39 C165 82 187 112 178 153 C170 190 143 209 112 199 C78 188 61 154 73 120 C84 89 111 69 130 39Z" fill="url(#petBodyGradient)"/>'
-    };
-    const shellPath = shell
-        ? '<path d="M85 95 C108 78 151 78 174 97" fill="none" stroke="rgba(255,255,255,.58)" stroke-width="8" stroke-linecap="round"/><path d="M77 153 C104 178 151 181 177 154" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="6" stroke-linecap="round"/>'
-        : '';
-    const stageBand = stage >= 2
-        ? '<path d="M92 170 C113 188 148 188 169 170" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="7" stroke-linecap="round"/>'
-        : '';
-    return `${shapes[body] || shapes.seed}${stageBand}${shellPath}`;
+function drawShadow(ctx) {
+    drawPixel(ctx, 46, 130, 68, 10, 'rgba(28, 31, 36, .18)');
+    drawPixel(ctx, 58, 140, 44, 5, 'rgba(28, 31, 36, .12)');
 }
 
-function renderEars(element, palette, stage) {
-    if (stage < 2) return '';
-    const color = palette[1];
-    const map = {
-        wood: `
-            <path class="avatar-ear" d="M91 73 C72 45 74 27 96 20 C105 45 108 61 104 78Z" fill="${color}"/>
-            <path class="avatar-ear" d="M160 73 C181 45 179 27 157 20 C148 45 145 61 149 78Z" fill="${color}"/>
-        `,
-        fire: `
-            <path class="avatar-ear" d="M94 76 C79 50 86 31 108 19 C111 45 109 62 103 79Z" fill="${color}"/>
-            <path class="avatar-ear" d="M157 76 C172 50 165 31 143 19 C140 45 142 62 148 79Z" fill="${color}"/>
-        `,
-        earth: `
-            <circle class="avatar-ear" cx="88" cy="70" r="21" fill="${color}"/>
-            <circle class="avatar-ear" cx="172" cy="70" r="21" fill="${color}"/>
-        `,
-        metal: `
-            <path class="avatar-ear" d="M84 76 L97 25 L111 76Z" fill="${color}"/>
-            <path class="avatar-ear" d="M149 76 L163 25 L176 76Z" fill="${color}"/>
-        `,
-        water: `
-            <path class="avatar-ear" d="M91 74 C70 54 77 29 103 31 C111 54 107 67 101 80Z" fill="${color}"/>
-            <path class="avatar-ear" d="M160 74 C181 54 174 29 148 31 C140 54 144 67 150 80Z" fill="${color}"/>
-        `
-    };
-    return map[element] || map.water;
+function drawBody(ctx, element, colors, stage, parts) {
+    const w = stage >= 4 ? 58 : stage >= 2 ? 52 : 44;
+    const h = stage >= 4 ? 60 : stage >= 2 ? 54 : 46;
+    const x = 80 - Math.floor(w / 2);
+    const y = stage >= 4 ? 58 : 66;
+    drawPixel(ctx, x + 8, y, w - 16, 8, colors[1]);
+    drawPixel(ctx, x, y + 8, w, h - 16, colors[1]);
+    drawPixel(ctx, x + 8, y + h - 8, w - 16, 8, colors[0]);
+    drawPixel(ctx, x + 8, y + 10, w - 16, 10, colors[2]);
+    drawPixel(ctx, x + w - 10, y + 16, 8, h - 28, colors[0]);
+    if (element === 'fire') drawPixel(ctx, x + 20, y - 12, 18, 14, '#ffb15f');
+    if (element === 'wood') drawPixel(ctx, x + 22, y - 10, 14, 12, '#61c77b');
+    if (element === 'metal') drawPixel(ctx, x + 14, y + 18, w - 28, 8, 'rgba(255,255,255,.58)');
+    if (element === 'earth') drawPixel(ctx, x + 12, y + h - 20, w - 24, 8, '#70562d');
+    if (element === 'water') drawPixel(ctx, x + 18, y - 8, 20, 10, '#5bc6bb');
+    if (parts.includes('shell')) {
+        drawPixel(ctx, x - 4, y + 20, 6, h - 18, '#ffffff');
+        drawPixel(ctx, x + w - 2, y + 20, 6, h - 18, '#ffffff');
+    }
 }
 
-function renderTail(element, palette, stage) {
-    if (stage < 2) return '';
-    const color = palette[0];
-    const map = {
-        wood: '<path class="avatar-tail" d="M70 154 C35 140 39 104 72 111 C58 128 63 144 82 152Z" fill="' + color + '" opacity=".72"/>',
-        fire: '<path class="avatar-tail" d="M184 157 C220 139 210 104 184 111 C199 130 198 148 176 160Z" fill="' + color + '" opacity=".72"/>',
-        earth: '<path class="avatar-tail" d="M72 164 C43 164 36 138 60 126 C68 140 80 148 92 154Z" fill="' + color + '" opacity=".7"/>',
-        metal: '<path class="avatar-tail" d="M184 156 L226 138 L187 127Z" fill="' + color + '" opacity=".7"/>',
-        water: '<path class="avatar-tail" d="M72 161 C39 152 47 119 77 124 C62 141 68 153 91 159Z" fill="' + color + '" opacity=".68"/>'
-    };
-    return map[element] || map.water;
+function drawTail(ctx, element, parts, colors, stage) {
+    if (stage < 2 && !parts.includes('tail')) return;
+    const color = colors[0];
+    if (element === 'metal') {
+        drawPixel(ctx, 112, 92, 18, 8, color);
+        drawPixel(ctx, 130, 86, 8, 20, color);
+        return;
+    }
+    drawPixel(ctx, 34, 92, 20, 10, color);
+    drawPixel(ctx, 26, 84, 12, 12, color);
+    if (element === 'fire') drawPixel(ctx, 20, 76, 10, 10, '#ff9a55');
 }
 
-function renderWings(palette, stage) {
-    const scale = stage >= 4 ? 1 : .76;
-    return `
-        <path class="avatar-wing" d="M78 122 C${42 - 10 * scale} ${95 - 8 * scale} ${41 - 8 * scale} ${61 - 8 * scale} 85 70 C93 88 93 106 78 122Z" fill="${palette[1]}" opacity=".58"/>
-        <path class="avatar-wing" d="M182 122 C${218 + 10 * scale} ${95 - 8 * scale} ${219 + 8 * scale} ${61 - 8 * scale} 175 70 C167 88 167 106 182 122Z" fill="${palette[1]}" opacity=".58"/>
-    `;
+function drawEars(ctx, element, parts, colors, stage) {
+    if (stage < 2 && !parts.includes('ears')) return;
+    const color = colors[1];
+    if (element === 'earth') {
+        drawPixel(ctx, 48, 54, 14, 14, color);
+        drawPixel(ctx, 98, 54, 14, 14, color);
+        return;
+    }
+    drawPixel(ctx, 52, 44, 12, 22, color);
+    drawPixel(ctx, 96, 44, 12, 22, color);
+    drawPixel(ctx, 56, 38, 8, 8, colors[2]);
+    drawPixel(ctx, 96, 38, 8, 8, colors[2]);
 }
 
-function renderFeet(palette, stage) {
-    if (stage < 2) return '';
-    return `
-        <ellipse class="avatar-foot" cx="103" cy="194" rx="18" ry="9" fill="${palette[0]}" opacity=".78"/>
-        <ellipse class="avatar-foot" cx="157" cy="194" rx="18" ry="9" fill="${palette[0]}" opacity=".78"/>
-    `;
+function drawFace(ctx, mood, stage) {
+    const eyeY = stage >= 4 ? 86 : 92;
+    drawPixel(ctx, 66, eyeY, 8, 10, '#20242a');
+    drawPixel(ctx, 88, eyeY, 8, 10, '#20242a');
+    if (mood === 'low') {
+        drawPixel(ctx, 72, eyeY + 24, 18, 4, '#20242a');
+    } else {
+        drawPixel(ctx, 72, eyeY + 22, 6, 4, '#20242a');
+        drawPixel(ctx, 78, eyeY + 26, 12, 4, '#20242a');
+        drawPixel(ctx, 90, eyeY + 22, 6, 4, '#20242a');
+    }
+    if (mood === 'happy') {
+        drawPixel(ctx, 56, eyeY + 14, 8, 6, '#ff9fb0');
+        drawPixel(ctx, 98, eyeY + 14, 8, 6, '#ff9fb0');
+    }
 }
 
-function renderElementMark(element, palette, stage) {
-    if (stage < 2) return '';
-    const mark = {
-        wood: '<path d="M130 91 C119 105 119 119 130 133 C142 118 141 105 130 91Z" fill="rgba(255,255,255,.46)"/>',
-        fire: '<path d="M130 91 C145 111 140 131 130 140 C119 128 116 113 130 91Z" fill="rgba(255,255,255,.48)"/>',
-        earth: '<circle cx="130" cy="118" r="18" fill="rgba(255,255,255,.38)"/>',
-        metal: '<path d="M130 94 L151 116 L130 138 L109 116Z" fill="rgba(255,255,255,.42)"/>',
-        water: '<path d="M130 92 C149 114 146 139 130 144 C114 139 111 114 130 92Z" fill="rgba(255,255,255,.42)"/>'
-    };
-    return `${mark[element] || mark.water}<circle cx="130" cy="118" r="5" fill="${palette[2]}" opacity=".86"/>`;
+function drawAccessories(ctx, state, colors) {
+    const parts = state.parts || [];
+    if (parts.includes('halo')) {
+        drawPixel(ctx, 58, 48, 44, 5, '#fff0a8');
+        drawPixel(ctx, 52, 53, 8, 5, '#fff0a8');
+        drawPixel(ctx, 100, 53, 8, 5, '#fff0a8');
+    }
+    if (parts.includes('sparkle')) {
+        drawPixel(ctx, 33, 55, 6, 6, '#fff0a8');
+        drawPixel(ctx, 124, 72, 6, 6, '#fff0a8');
+        drawPixel(ctx, 116, 118, 6, 6, colors[2]);
+    }
+    if (parts.includes('badge')) {
+        drawPixel(ctx, 76, 116, 10, 10, '#f4c978');
+        drawPixel(ctx, 78, 118, 6, 6, '#8c6d3a');
+    }
+    if (parts.includes('pillow')) drawPixel(ctx, 54, 124, 52, 8, '#d8fff8');
+    if (parts.includes('feet')) {
+        drawPixel(ctx, 58, 122, 16, 8, colors[0]);
+        drawPixel(ctx, 88, 122, 16, 8, colors[0]);
+    }
+    if (parts.includes('crown')) {
+        drawPixel(ctx, 66, 44, 28, 8, '#f4c978');
+        drawPixel(ctx, 70, 36, 6, 8, '#f4c978');
+        drawPixel(ctx, 82, 34, 6, 10, '#f4c978');
+    }
+    const axes = state.core.mbti?.axes || {};
+    if (axes.perception > 0) drawPixel(ctx, 118, 48, 8, 8, '#fff0a8');
+    if (axes.energy > 0) {
+        drawPixel(ctx, 42, 84, 6, 6, colors[2]);
+        drawPixel(ctx, 112, 84, 6, 6, colors[2]);
+    }
+    if (axes.energy < 0) drawPixel(ctx, 70, 74, 20, 5, 'rgba(32,36,42,.18)');
 }
 
-function renderCheeks(palette, stage) {
-    if (stage < 2) return '';
-    return `
-        <circle cx="92" cy="141" r="8" fill="${palette[2]}" opacity=".42"/>
-        <circle cx="168" cy="141" r="8" fill="${palette[2]}" opacity=".42"/>
-    `;
-}
-
-function renderRoots() {
-    return `
-        <path d="M117 190 C110 211 98 219 82 224" fill="none" stroke="#7a5a31" stroke-width="5" stroke-linecap="round"/>
-        <path d="M137 190 C143 211 157 219 176 223" fill="none" stroke="#7a5a31" stroke-width="5" stroke-linecap="round"/>
-    `;
-}
-
-function renderGlow() {
-    return '<circle class="inner-glow" cx="130" cy="151" r="18" fill="#fff0a8" opacity=".82"/>';
-}
-
-function renderEyes(type, stage) {
-    const deep = type === 'deep';
-    const shine = stage >= 3
-        ? '<circle cx="105" cy="119" r="3" fill="#fff"/><circle cx="149" cy="119" r="3" fill="#fff"/>'
-        : '';
-    return `
-        <ellipse class="avatar-eye" cx="108" cy="124" rx="${deep ? 8 : 10}" ry="${deep ? 12 : 9}" fill="#20242a"/>
-        <ellipse class="avatar-eye" cx="152" cy="124" rx="${deep ? 8 : 10}" ry="${deep ? 12 : 9}" fill="#20242a"/>
-        ${shine}
-        <path d="M113 158 C123 166 139 166 149 158" fill="none" stroke="#20242a" stroke-width="5" stroke-linecap="round"/>
-    `;
-}
-
-function renderParticles(aura, palette) {
-    const color = aura === 'spark' ? '#f4c978' : palette[2];
-    return [60, 95, 176, 204].map((x, index) => {
-        const y = [78, 200, 62, 154][index];
-        return `<circle class="avatar-particle particle-${index}" cx="${x}" cy="${y}" r="${index % 2 ? 4 : 3}" fill="${color}" opacity=".78"/>`;
-    }).join('');
+function getMoodForState(state) {
+    const needs = state.needs || {};
+    const average = Object.values(needs).reduce((sum, value) => sum + value, 0) / Math.max(1, Object.values(needs).length);
+    if (average >= 76 || needs.joy >= 82) return 'happy';
+    if (average < 42 || needs.energy < 28 || needs.hunger < 28) return 'low';
+    return 'calm';
 }
 
 questionStack.addEventListener('click', function (event) {
-    const button = event.target.closest('.answer-option');
+    const button = event.target.closest('.care-action');
     if (!button) return;
-    const questionId = button.dataset.question;
-    answers[questionId] = Number(button.dataset.option);
-    questionStack.querySelectorAll(`[data-question="${questionId}"].answer-option`).forEach((option) => {
+    selectedActionId = button.dataset.action;
+    questionStack.querySelectorAll('.care-action').forEach((option) => {
         option.classList.toggle('selected', option === button);
     });
-    completeDailyBtn.disabled = Object.keys(answers).length !== getDailyQuestions().length;
+    completeDailyBtn.disabled = false;
 });
 
 createPetBtn.addEventListener('click', createPet);
@@ -796,7 +732,7 @@ if (resetTestBtn) {
     resetTestBtn.addEventListener('click', function () {
         localStorage.removeItem(STORAGE_KEY);
         pet = null;
-        answers = {};
+        selectedActionId = null;
         evolutionCard.hidden = true;
         renderApp();
     });
@@ -804,34 +740,28 @@ if (resetTestBtn) {
 
 function createDefaultTestPet() {
     if (pet) return;
-    avatarNameInput.value = '테스트 아바타';
+    avatarNameInput.value = '테스트 알';
     birthDateInput.value = '1993-11-18';
     birthTimeInput.value = 'night';
     createPet();
 }
 
-function applyTestPattern(pattern) {
+function applyTestAction(actionId) {
     createDefaultTestPet();
-    const questions = getDailyQuestions();
-    answers = {};
-    questions.forEach((question, index) => {
-        answers[question.id] = pattern(index, question);
-    });
+    selectedActionId = actionId;
     completeDaily();
 }
 
 if (runAllTestBtn) {
     runAllTestBtn.addEventListener('click', function () {
-        [0, 1, 2].forEach((optionIndex) => {
-            applyTestPattern(() => optionIndex);
-        });
+        CARE_ACTIONS.forEach((action) => applyTestAction(action.id));
     });
 }
 
 if (runWeekTestBtn) {
     runWeekTestBtn.addEventListener('click', function () {
         for (let day = 0; day < 7; day += 1) {
-            applyTestPattern((index) => (day + index) % 3);
+            applyTestAction(CARE_ACTIONS[day % CARE_ACTIONS.length].id);
         }
     });
 }

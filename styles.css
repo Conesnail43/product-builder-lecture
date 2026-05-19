@@ -1369,52 +1369,24 @@ h1 {
 }
 
 .avatar-mount {
-    width: min(330px, 88%);
+    display: grid;
+    width: min(360px, 90%);
+    place-items: center;
 }
 
-.generated-avatar {
+.pixel-avatar {
     width: 100%;
-    overflow: visible;
-}
-
-.avatar-body {
-    animation: avatarBreathe 4.8s ease-in-out infinite;
-    transform-origin: center;
-}
-
-.avatar-ear,
-.avatar-tail,
-.avatar-foot,
-.mbti-traits {
-    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .16));
-}
-
-.mbti-pulse {
-    animation: auraPulse 3.2s ease-in-out infinite;
-}
-
-.avatar-aura {
-    animation: auraPulse 6s ease-in-out infinite;
-}
-
-.avatar-particle {
-    animation: particleFloat 7s ease-in-out infinite;
-}
-
-.particle-1 {
-    animation-delay: -1.6s;
-}
-
-.particle-2 {
-    animation-delay: -3.2s;
-}
-
-.particle-3 {
-    animation-delay: -4.8s;
-}
-
-.inner-glow {
-    animation: auraPulse 3.6s ease-in-out infinite;
+    max-width: 360px;
+    aspect-ratio: 1;
+    border: 10px solid color-mix(in srgb, var(--panel-strong) 80%, var(--line));
+    border-radius: 18px;
+    background: #f8fbff;
+    box-shadow:
+        0 22px 42px rgba(0, 0, 0, .18),
+        inset 0 0 0 2px rgba(255, 255, 255, .65);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    animation: pixelBob 3.8s steps(4, end) infinite;
 }
 
 .pet-summary {
@@ -1472,6 +1444,42 @@ h1 {
     font-size: 20px;
 }
 
+.pet-meters {
+    display: grid;
+    gap: 8px;
+}
+
+.pet-meter {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 34px;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 950;
+}
+
+.pet-meter i {
+    overflow: hidden;
+    display: block;
+    height: 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel);
+}
+
+.pet-meter b {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--warm));
+}
+
+.pet-meter strong {
+    color: var(--text);
+    text-align: right;
+}
+
 .onboarding-card,
 .daily-card,
 .evolution-card,
@@ -1522,6 +1530,68 @@ h1 {
 .question-stack {
     display: grid;
     gap: 12px;
+}
+
+.care-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.care-action {
+    display: grid;
+    min-height: 172px;
+    align-content: start;
+    gap: 9px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+
+.care-action:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 46%, var(--line));
+}
+
+.care-action.selected {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+}
+
+.care-icon {
+    display: grid;
+    width: 42px;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 2px solid currentColor;
+    border-radius: 10px;
+    color: var(--accent);
+    font-size: 24px;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.care-action strong {
+    font-size: 16px;
+}
+
+.care-action small,
+.care-action em {
+    color: var(--muted);
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.care-action em {
+    margin-top: auto;
+    color: var(--accent);
 }
 
 .question-card {
@@ -1771,30 +1841,12 @@ h1 {
     line-height: 1.45;
 }
 
-@keyframes avatarBreathe {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.025);
-    }
-}
-
-@keyframes auraPulse {
-    0%, 100% {
-        opacity: .22;
-    }
-    50% {
-        opacity: .42;
-    }
-}
-
-@keyframes particleFloat {
+@keyframes pixelBob {
     0%, 100% {
         transform: translateY(0);
     }
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-5px);
     }
 }
 
@@ -2154,6 +2206,7 @@ h1 {
     .product-hero,
     .pet-widget,
     .onboarding-grid,
+    .care-grid,
     .answer-grid,
     .growth-log,
     .test-console {
@@ -2189,11 +2242,20 @@ h1 {
 
     .hero-widget,
     .pet-stage {
-        min-height: 280px;
+        min-height: 300px;
     }
 
     .pet-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .care-action {
+        min-height: 128px;
+    }
+
+    .pixel-avatar {
+        max-width: 300px;
+        border-width: 8px;
     }
 
     .form-grid {

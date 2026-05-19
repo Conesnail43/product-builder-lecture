@@ -39,7 +39,7 @@
             </header>
 
             <section class="test-console" aria-label="빠른 테스트 도구">
-                <button class="action-button" id="runAllTestBtn" type="button">모든 선택지 3회 적용</button>
+                <button class="action-button" id="runAllTestBtn" type="button">모든 돌봄 행동 적용</button>
                 <button class="secondary-button" id="runWeekTestBtn" type="button">7일 랜덤 패턴 시뮬레이션</button>
                 <button class="secondary-button" id="resetTestBtn" type="button">테스트 데이터 초기화</button>
             </section>
@@ -55,6 +55,7 @@
                     <p id="petLine">하루 제한 없이 성장 로직을 반복 검증합니다.</p>
                     <div class="birth-rhythm" id="birthRhythm">태어난 리듬을 기다리는 중</div>
                     <div class="pet-stats" id="petStats" aria-label="아바타 성장 스탯"></div>
+                    <div class="pet-meters" id="petMeters" aria-label="테스트 아바타 상태"></div>
                 </div>
             </section>
 
@@ -91,7 +92,7 @@
                     <p class="eyebrow">All Questions</p>
                     <h2 id="dailyTitle">선택지 수동 검증</h2>
                 </div>
-                <p class="method-note">테스트 모드에서는 모든 질문이 표시되고, 완료 후에도 다시 선택할 수 있습니다. MBTI적 성향은 선택 누적으로 자동 추정됩니다.</p>
+                <p class="method-note">테스트 모드에서는 모든 돌봄 행동이 표시되고, 완료 후에도 다시 선택할 수 있습니다. 성향과 파츠 해금은 선택 누적으로 자동 계산됩니다.</p>
                 <div class="question-stack" id="questionStack"></div>
                 <button class="action-button" id="completeDailyBtn" type="button" disabled>선택 결과 적용</button>
             </section>

@@ -3,6 +3,7 @@ const IS_TEST_MODE = PET_MODE === 'test';
 const STORAGE_KEY = IS_TEST_MODE ? 'inner-hatch-avatar-test-v2' : 'inner-hatch-avatar-v2';
 const LEGACY_STORAGE_KEY = IS_TEST_MODE ? 'inner-hatch-avatar-test-v1' : 'inner-hatch-avatar-v1';
 const TODAY_KEY = new Date().toISOString().slice(0, 10);
+const DAILY_AP = 3;
 
 const ELEMENTS = {
     wood: { label: '목', name: '나무', rhythm: '봄의 성장성', colors: ['#2f8f83', '#61c77b', '#d8f8ce'], body: 'sprout' },
@@ -125,6 +126,16 @@ const PARTS = [
     { id: 'pillow', label: '휴식 쿠션', stat: 'recovery', threshold: 6 }
 ];
 
+const EVOLUTION_FORMS = {
+    empathy: { label: '하트링', trait: '관계형', part: 'heartGem' },
+    boundary: { label: '실드쉘', trait: '수호형', part: 'shieldShell' },
+    exploration: { label: '루트러너', trait: '탐험형', part: 'runnerWing' },
+    expression: { label: '스파크싱어', trait: '표현형', part: 'voiceSpark' },
+    responsibility: { label: '앵커가드', trait: '훈련형', part: 'anchorArmor' },
+    recovery: { label: '문슬리퍼', trait: '회복형', part: 'moonPillow' },
+    stability: { label: '네스트코어', trait: '안정형', part: 'nestCore' }
+};
+
 const avatarMount = document.getElementById('avatarMount');
 const petDay = document.getElementById('petDay');
 const petName = document.getElementById('petName');
@@ -152,6 +163,9 @@ const runWeekTestBtn = document.getElementById('runWeekTestBtn');
 
 let pet = loadPet();
 let selectedActionId = null;
+let activeCanvas = null;
+let activeAvatarState = null;
+let avatarAnimationId = null;
 
 function loadPet() {
     try {
@@ -176,7 +190,9 @@ function normalizePet(saved) {
     saved.core.mbti = buildMbtiProfileFromScores(saved.core.mbtiScores);
     saved.parts = saved.parts || [];
     saved.stage = saved.stage || 1;
+    saved.form = saved.form || buildEvolutionForm(getDominantStatFor(saved.stats || {}));
     saved.dailyAura = saved.dailyAura || 'mist';
+    saved.dailyCare = resetDailyCareIfNeeded(saved.dailyCare);
     saved.log = saved.log || [];
     return saved;
 }
@@ -191,7 +207,9 @@ function migrateLegacyPet(legacy) {
         needs: { hunger: 72, joy: 68, energy: 70, bond: 45 },
         wallet: { xp: Math.max(0, (legacy.log || []).length * 12), coins: (legacy.log || []).length * 3, streak: 0 },
         parts: legacy.mutations || [],
+        form: buildEvolutionForm(getDominantStatFor(legacy.stats || {})),
         dailyAura: legacy.dailyAura || 'mist',
+        dailyCare: { date: TODAY_KEY, remaining: DAILY_AP, used: 0 },
         stage: legacy.stage || 1,
         log: legacy.log || []
     });
@@ -205,6 +223,17 @@ function savePet(target = pet) {
 
 function clamp(value, min = 0, max = 100) {
     return Math.max(min, Math.min(max, value));
+}
+
+function resetDailyCareIfNeeded(dailyCare) {
+    if (!dailyCare || dailyCare.date !== TODAY_KEY) {
+        return { date: TODAY_KEY, remaining: DAILY_AP, used: 0 };
+    }
+    return {
+        date: TODAY_KEY,
+        remaining: clamp(dailyCare.remaining ?? DAILY_AP, 0, DAILY_AP),
+        used: clamp(dailyCare.used ?? 0, 0, DAILY_AP)
+    };
 }
 
 function getElementFromBirth(dateString) {
@@ -253,6 +282,8 @@ function createPet() {
         needs: { hunger: 76, joy: 72, energy: 78, bond: 38 },
         wallet: { xp: 0, coins: 0, streak: 0 },
         parts: [],
+        form: buildEvolutionForm('stability'),
+        dailyCare: { date: TODAY_KEY, remaining: DAILY_AP, used: 0 },
         dailyAura: 'mist',
         stage: 1,
         log: []
@@ -303,10 +334,14 @@ function getDayNumber() {
     return Math.floor(Math.max(0, today - start) / 86400000) + 1;
 }
 
+function hasCareTurns() {
+    if (!pet) return false;
+    pet.dailyCare = resetDailyCareIfNeeded(pet.dailyCare);
+    return IS_TEST_MODE || pet.dailyCare.remaining > 0;
+}
+
 function getAvailableActions() {
-    if (IS_TEST_MODE) return CARE_ACTIONS;
-    const seed = TODAY_KEY.split('-').reduce((sum, part) => sum + Number(part), 0);
-    return [0, 1, 2].map((offset) => CARE_ACTIONS[(seed + offset) % CARE_ACTIONS.length]);
+    return CARE_ACTIONS;
 }
 
 function renderActions() {
@@ -335,6 +370,7 @@ function formatNeeds(needs) {
 }
 
 function applyCareAction(action) {
+    const wasFirstActionToday = pet.lastCheckIn !== TODAY_KEY;
     Object.entries(action.delta).forEach(([stat, value]) => {
         pet.stats[stat] = (pet.stats[stat] || 0) + value;
     });
@@ -346,9 +382,18 @@ function applyCareAction(action) {
         pet.core.mbtiScores[axis] = (pet.core.mbtiScores[axis] || 0) + value;
     });
     pet.core.mbti = buildMbtiProfileFromScores(pet.core.mbtiScores);
-    pet.wallet.xp += 14 + Math.max(0, Math.round((pet.needs.bond - 40) / 12));
+    pet.wallet.xp += 12 + Math.max(0, Math.round((pet.needs.bond - 40) / 12));
     pet.wallet.coins += 3 + (action.id === 'explore' ? 2 : 0);
-    pet.wallet.streak = IS_TEST_MODE ? pet.wallet.streak + 1 : getNextStreak();
+    if (IS_TEST_MODE) {
+        pet.wallet.streak += 1;
+    } else if (wasFirstActionToday) {
+        pet.wallet.streak = getNextStreak();
+    }
+    if (!IS_TEST_MODE) {
+        pet.dailyCare = resetDailyCareIfNeeded(pet.dailyCare);
+        pet.dailyCare.remaining = clamp(pet.dailyCare.remaining - 1, 0, DAILY_AP);
+        pet.dailyCare.used = clamp(pet.dailyCare.used + 1, 0, DAILY_AP);
+    }
     pet.dailyAura = action.aura;
 }
 
@@ -361,13 +406,15 @@ function getNextStreak() {
 }
 
 function updateStage() {
-    const xpStage = Math.min(5, 1 + Math.floor(pet.wallet.xp / 42));
-    const logStage = Math.min(5, 1 + Math.floor((pet.log.length + 1) / (IS_TEST_MODE ? 3 : 5)));
+    const xpStage = Math.min(5, 1 + Math.floor(pet.wallet.xp / 70));
+    const logStage = Math.min(5, 1 + Math.floor((pet.log.length + 1) / (IS_TEST_MODE ? 4 : 10)));
     pet.stage = Math.max(pet.stage || 1, xpStage, logStage);
+    pet.form = buildEvolutionForm(getDominantStat());
 }
 
 function unlockParts() {
     const gained = [];
+    const formPart = EVOLUTION_FORMS[pet.form?.stat]?.part;
     PARTS.forEach((part) => {
         if ((pet.stats[part.stat] || 0) >= part.threshold && !pet.parts.includes(part.id)) {
             pet.parts.push(part.id);
@@ -382,15 +429,28 @@ function unlockParts() {
         pet.parts.push('crown');
         gained.push('성장 왕관');
     }
+    if (pet.stage >= 2 && formPart && !pet.parts.includes(formPart)) {
+        pet.parts.push(formPart);
+        gained.push(`${pet.form.label} 진화 파츠`);
+    }
     return gained;
 }
 
 function getDominantStat() {
-    return Object.entries(pet.stats).sort((a, b) => b[1] - a[1])[0][0];
+    return getDominantStatFor(pet.stats);
+}
+
+function getDominantStatFor(stats) {
+    return Object.entries({ stability: 1, ...stats }).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function buildEvolutionForm(stat) {
+    const form = EVOLUTION_FORMS[stat] || EVOLUTION_FORMS.stability;
+    return { stat, ...form };
 }
 
 function completeDaily() {
-    if (!pet || (!IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY)) return;
+    if (!pet || !hasCareTurns()) return;
     const action = CARE_ACTIONS.find((item) => item.id === selectedActionId);
     if (!action) return;
 
@@ -402,7 +462,7 @@ function completeDaily() {
     const entry = {
         date: IS_TEST_MODE ? `Test ${pet.log.length + 1}` : TODAY_KEY,
         name: buildCareResultName(action, dominantStat),
-        text: `${action.name}로 ${pet.name}의 ${NEED_LABELS[mood.need]} 상태가 ${mood.label} 쪽으로 움직였습니다. ${action.reward}을 얻었습니다.`,
+        text: `${action.name}로 ${pet.name}의 ${NEED_LABELS[mood.need]} 상태가 ${mood.label} 쪽으로 움직였습니다. ${pet.form.label} 형태가 조금 더 선명해졌습니다.`,
         action: action.name,
         delta: action.delta,
         needs: action.needs,
@@ -411,6 +471,8 @@ function completeDaily() {
         gained,
         reward: action.reward,
         aura: action.aura,
+        form: pet.form,
+        remaining: pet.dailyCare?.remaining ?? DAILY_AP,
         stage: pet.stage
     };
 
@@ -423,8 +485,9 @@ function completeDaily() {
 }
 
 function buildCareResultName(action, stat) {
-    const stageName = ['알', '꼬마', '방랑', '수호', '성체'][Math.max(0, pet.stage - 1)] || '성체';
-    return `${STAT_LABELS[stat]} ${stageName} · ${action.reward}`;
+    const stageName = ['알', '꼬마', '변이', '성장체', '성체'][Math.max(0, pet.stage - 1)] || '성체';
+    const form = EVOLUTION_FORMS[stat] || EVOLUTION_FORMS.stability;
+    return `${form.label} ${stageName} · ${action.reward}`;
 }
 
 function getMood() {
@@ -455,7 +518,11 @@ function renderEvidence(entry) {
     evidencePanel.innerHTML = `
         <div class="evidence-summary">
             <p>게임 보상</p>
-            <div><span>${entry.reward}</span><span>XP +14</span><span>연속 ${pet.wallet.streak}일</span></div>
+            <div><span>${entry.reward}</span><span>XP 획득</span><span>남은 AP ${entry.remaining}</span><span>연속 ${pet.wallet.streak}일</span></div>
+        </div>
+        <div class="evidence-summary">
+            <p>진화 형태</p>
+            <div><span>${pet.form.label}</span><span>${pet.form.trait}</span><span>${STAT_LABELS[pet.form.stat]} 중심</span></div>
         </div>
         <div class="evidence-summary">
             <p>상태 변화</p>
@@ -487,6 +554,7 @@ function renderApp() {
             core: { primaryElement: 'water', secondaryElement: 'water', colors: ELEMENTS.water.colors },
             needs: { hunger: 70, joy: 70, energy: 70, bond: 40 },
             parts: [],
+            form: buildEvolutionForm('stability'),
             stage: 1,
             dailyAura: 'mist'
         });
@@ -498,8 +566,9 @@ function renderApp() {
     }
 
     onboardingCard.hidden = true;
-    dailyCard.hidden = !IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY;
-    petDay.textContent = `Day ${getDayNumber()} · Lv.${pet.stage}`;
+    pet.dailyCare = resetDailyCareIfNeeded(pet.dailyCare);
+    dailyCard.hidden = !hasCareTurns();
+    petDay.textContent = `Day ${getDayNumber()} · Lv.${pet.stage} · AP ${IS_TEST_MODE ? '∞' : pet.dailyCare.remaining}`;
     petName.textContent = pet.name;
     petLine.textContent = buildPetLine();
     birthRhythm.textContent = `${pet.core.birthRhythm} · ${pet.core.mbti.label}`;
@@ -508,7 +577,7 @@ function renderApp() {
     renderMeters();
     renderGrowthLog();
 
-    if (IS_TEST_MODE || pet.lastCheckIn !== TODAY_KEY) {
+    if (hasCareTurns()) {
         renderActions();
     } else if (pet.log[0]) {
         showEvolution(pet.log[0]);
@@ -517,8 +586,8 @@ function renderApp() {
 
 function buildPetLine() {
     const mood = getMood();
-    if (!IS_TEST_MODE && pet.lastCheckIn === TODAY_KEY) return `오늘은 이미 돌봤습니다. ${NEED_LABELS[mood.need]} 상태가 ${mood.label}입니다.`;
-    return `${NEED_LABELS[mood.need]} 상태가 ${mood.label}입니다. 오늘 한 번 돌봐주세요.`;
+    if (!hasCareTurns()) return `오늘의 AP를 모두 사용했습니다. ${pet.form.label} 형태가 안정되는 중입니다.`;
+    return `${pet.form.label} ${pet.form.trait} · ${NEED_LABELS[mood.need]} 상태가 ${mood.label}입니다.`;
 }
 
 function renderEmptyStats() {
@@ -530,7 +599,7 @@ function renderStats() {
         <span>Lv<strong>${pet.stage}</strong></span>
         <span>XP<strong>${pet.wallet.xp}</strong></span>
         <span>코인<strong>${pet.wallet.coins}</strong></span>
-        <span>연속<strong>${pet.wallet.streak}</strong></span>
+        <span>AP<strong>${IS_TEST_MODE ? '∞' : pet.dailyCare.remaining}</strong></span>
     `;
 }
 
@@ -568,19 +637,42 @@ function renderGrowthLog() {
 
 function renderPixelAvatar(state) {
     avatarMount.innerHTML = '<canvas class="pixel-avatar" width="160" height="160" aria-label="도트 아바타"></canvas>';
-    const canvas = avatarMount.querySelector('canvas');
-    const ctx = canvas.getContext('2d');
+    activeCanvas = avatarMount.querySelector('canvas');
+    activeAvatarState = state;
+    drawAvatarFrame(0);
+    startAvatarAnimation();
+}
+
+function startAvatarAnimation() {
+    if (avatarAnimationId) cancelAnimationFrame(avatarAnimationId);
+    const tick = (time) => {
+        drawAvatarFrame(time);
+        avatarAnimationId = requestAnimationFrame(tick);
+    };
+    avatarAnimationId = requestAnimationFrame(tick);
+}
+
+function drawAvatarFrame(time) {
+    if (!activeCanvas || !activeAvatarState) return;
+    const state = activeAvatarState;
+    const ctx = activeCanvas.getContext('2d');
     const colors = state.core.colors || ELEMENTS[state.core.primaryElement || 'water'].colors;
     const element = state.core.primaryElement || 'water';
     const parts = state.parts || [];
+    const frame = Math.floor(time / 280) % 4;
+    const bob = [0, -2, -1, 1][frame];
+    const blink = Math.floor(time / 1800) % 6 === 0;
     ctx.imageSmoothingEnabled = false;
     drawBackground(ctx, state.dailyAura || 'mist', colors);
     drawShadow(ctx);
-    drawTail(ctx, element, parts, colors, state.stage || 1);
-    drawBody(ctx, element, colors, state.stage || 1, parts);
-    drawEars(ctx, element, parts, colors, state.stage || 1);
-    drawFace(ctx, getMoodForState(state), state.stage || 1);
-    drawAccessories(ctx, state, colors);
+    ctx.save();
+    ctx.translate(0, bob);
+    drawTail(ctx, element, parts, colors, state.stage || 1, frame);
+    drawBody(ctx, element, colors, state.stage || 1, parts, state.form);
+    drawEars(ctx, element, parts, colors, state.stage || 1, frame);
+    drawFace(ctx, getMoodForState(state), state.stage || 1, blink);
+    drawAccessories(ctx, state, colors, frame);
+    ctx.restore();
 }
 
 function drawPixel(ctx, x, y, w, h, color) {
@@ -607,11 +699,11 @@ function drawShadow(ctx) {
     drawPixel(ctx, 58, 140, 44, 5, 'rgba(28, 31, 36, .12)');
 }
 
-function drawBody(ctx, element, colors, stage, parts) {
-    const w = stage >= 4 ? 58 : stage >= 2 ? 52 : 44;
-    const h = stage >= 4 ? 60 : stage >= 2 ? 54 : 46;
+function drawBody(ctx, element, colors, stage, parts, form) {
+    const w = stage >= 5 ? 68 : stage >= 4 ? 60 : stage >= 2 ? 52 : 44;
+    const h = stage >= 5 ? 68 : stage >= 4 ? 62 : stage >= 2 ? 54 : 46;
     const x = 80 - Math.floor(w / 2);
-    const y = stage >= 4 ? 58 : 66;
+    const y = stage >= 5 ? 50 : stage >= 4 ? 56 : 66;
     drawPixel(ctx, x + 8, y, w - 16, 8, colors[1]);
     drawPixel(ctx, x, y + 8, w, h - 16, colors[1]);
     drawPixel(ctx, x + 8, y + h - 8, w - 16, 8, colors[0]);
@@ -622,43 +714,57 @@ function drawBody(ctx, element, colors, stage, parts) {
     if (element === 'metal') drawPixel(ctx, x + 14, y + 18, w - 28, 8, 'rgba(255,255,255,.58)');
     if (element === 'earth') drawPixel(ctx, x + 12, y + h - 20, w - 24, 8, '#70562d');
     if (element === 'water') drawPixel(ctx, x + 18, y - 8, 20, 10, '#5bc6bb');
+    if (form?.stat === 'empathy') drawPixel(ctx, x + 20, y + 26, 18, 14, '#ff9fb0');
+    if (form?.stat === 'boundary') drawPixel(ctx, x - 6, y + 22, 6, h - 24, '#eaf4ff');
+    if (form?.stat === 'exploration') drawPixel(ctx, x + w - 2, y + 28, 12, 8, '#fff0a8');
+    if (form?.stat === 'expression') drawPixel(ctx, x + 18, y + h - 18, 22, 6, '#fff0a8');
+    if (form?.stat === 'responsibility') drawPixel(ctx, x + 10, y + 18, w - 20, 8, '#687384');
+    if (form?.stat === 'recovery') drawPixel(ctx, x + 16, y + h - 12, w - 32, 8, '#d8fff8');
+    if (form?.stat === 'stability') drawPixel(ctx, x + 12, y + h - 18, w - 24, 12, '#efe4c2');
     if (parts.includes('shell')) {
         drawPixel(ctx, x - 4, y + 20, 6, h - 18, '#ffffff');
         drawPixel(ctx, x + w - 2, y + 20, 6, h - 18, '#ffffff');
     }
 }
 
-function drawTail(ctx, element, parts, colors, stage) {
+function drawTail(ctx, element, parts, colors, stage, frame = 0) {
     if (stage < 2 && !parts.includes('tail')) return;
     const color = colors[0];
+    const wag = frame % 2 ? 4 : 0;
     if (element === 'metal') {
-        drawPixel(ctx, 112, 92, 18, 8, color);
-        drawPixel(ctx, 130, 86, 8, 20, color);
+        drawPixel(ctx, 112, 92 + wag, 18, 8, color);
+        drawPixel(ctx, 130, 86 + wag, 8, 20, color);
         return;
     }
-    drawPixel(ctx, 34, 92, 20, 10, color);
-    drawPixel(ctx, 26, 84, 12, 12, color);
-    if (element === 'fire') drawPixel(ctx, 20, 76, 10, 10, '#ff9a55');
+    drawPixel(ctx, 34, 92 + wag, 20, 10, color);
+    drawPixel(ctx, 26, 84 + wag, 12, 12, color);
+    if (element === 'fire') drawPixel(ctx, 20, 76 + wag, 10, 10, '#ff9a55');
 }
 
-function drawEars(ctx, element, parts, colors, stage) {
+function drawEars(ctx, element, parts, colors, stage, frame = 0) {
     if (stage < 2 && !parts.includes('ears')) return;
     const color = colors[1];
+    const twitch = frame === 1 ? -2 : 0;
     if (element === 'earth') {
-        drawPixel(ctx, 48, 54, 14, 14, color);
-        drawPixel(ctx, 98, 54, 14, 14, color);
+        drawPixel(ctx, 48, 54 + twitch, 14, 14, color);
+        drawPixel(ctx, 98, 54 - twitch, 14, 14, color);
         return;
     }
-    drawPixel(ctx, 52, 44, 12, 22, color);
-    drawPixel(ctx, 96, 44, 12, 22, color);
-    drawPixel(ctx, 56, 38, 8, 8, colors[2]);
-    drawPixel(ctx, 96, 38, 8, 8, colors[2]);
+    drawPixel(ctx, 52, 44 + twitch, 12, 22, color);
+    drawPixel(ctx, 96, 44 - twitch, 12, 22, color);
+    drawPixel(ctx, 56, 38 + twitch, 8, 8, colors[2]);
+    drawPixel(ctx, 96, 38 - twitch, 8, 8, colors[2]);
 }
 
-function drawFace(ctx, mood, stage) {
+function drawFace(ctx, mood, stage, blink = false) {
     const eyeY = stage >= 4 ? 86 : 92;
-    drawPixel(ctx, 66, eyeY, 8, 10, '#20242a');
-    drawPixel(ctx, 88, eyeY, 8, 10, '#20242a');
+    if (blink) {
+        drawPixel(ctx, 66, eyeY + 4, 8, 3, '#20242a');
+        drawPixel(ctx, 88, eyeY + 4, 8, 3, '#20242a');
+    } else {
+        drawPixel(ctx, 66, eyeY, 8, 10, '#20242a');
+        drawPixel(ctx, 88, eyeY, 8, 10, '#20242a');
+    }
     if (mood === 'low') {
         drawPixel(ctx, 72, eyeY + 24, 18, 4, '#20242a');
     } else {
@@ -672,7 +778,7 @@ function drawFace(ctx, mood, stage) {
     }
 }
 
-function drawAccessories(ctx, state, colors) {
+function drawAccessories(ctx, state, colors, frame = 0) {
     const parts = state.parts || [];
     if (parts.includes('halo')) {
         drawPixel(ctx, 58, 48, 44, 5, '#fff0a8');
@@ -698,6 +804,17 @@ function drawAccessories(ctx, state, colors) {
         drawPixel(ctx, 70, 36, 6, 8, '#f4c978');
         drawPixel(ctx, 82, 34, 6, 10, '#f4c978');
     }
+    if (parts.includes('heartGem')) drawPixel(ctx, 76, 54, 10, 10, '#ff9fb0');
+    if (parts.includes('shieldShell')) drawPixel(ctx, 42, 88, 8, 34, '#eaf4ff');
+    if (parts.includes('runnerWing')) {
+        const flap = frame % 2 ? -4 : 0;
+        drawPixel(ctx, 110, 72 + flap, 18, 10, '#fff0a8');
+        drawPixel(ctx, 122, 82 + flap, 10, 10, '#fff0a8');
+    }
+    if (parts.includes('voiceSpark')) drawPixel(ctx, 102, 106, 12, 8, '#fff0a8');
+    if (parts.includes('anchorArmor')) drawPixel(ctx, 60, 108, 42, 8, '#687384');
+    if (parts.includes('moonPillow')) drawPixel(ctx, 98, 48, 14, 14, '#d8fff8');
+    if (parts.includes('nestCore')) drawPixel(ctx, 54, 132, 52, 8, '#d0aa62');
     const axes = state.core.mbti?.axes || {};
     if (axes.perception > 0) drawPixel(ctx, 118, 48, 8, 8, '#fff0a8');
     if (axes.energy > 0) {

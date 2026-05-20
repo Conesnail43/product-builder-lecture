@@ -13,6 +13,11 @@ const napolitanStories = [
             '엘리베이터가 1층에 도착했는데 로비 시계가 03:33을 가리키면 문이 닫힐 때까지 뒤돌아보지 말고 기다리십시오.',
             '위 수칙을 지키지 못한 경우 관리실로 오지 마십시오. 관리실은 지하 2층에 없습니다.'
         ],
+        anomalies: [
+            '4호기 호출 버튼이 눌리지 않았는데도 점등되었습니다.',
+            'CCTV 기록에 13층이 11초 동안 표시되었습니다.',
+            '관리실 내선이 지하 2층에서 수신된 것으로 남았습니다.'
+        ],
         note: '관리사무소는 B동 지하 2층 안내 표지판을 부착한 적이 없습니다.'
     },
     {
@@ -28,6 +33,11 @@ const napolitanStories = [
             '대출카드에 본인의 이름이 이미 적혀 있더라도 서명하지 마십시오. 해당 자료는 반납 처리된 적이 없습니다.',
             '퇴실 시 책갈피가 주머니에서 발견되면 안내 데스크에 맡기지 말고 1층 화장실 휴지통에 버리십시오.',
             '서고에서 나온 뒤에도 종이 냄새가 계속 난다면 오늘 읽은 문장을 아무에게도 설명하지 마십시오.'
+        ],
+        anomalies: [
+            '열람증 발급 기록보다 반납 기록이 하나 더 많습니다.',
+            '0번 서가 주변 온도가 4도 낮게 측정되었습니다.',
+            '대출카드에 아직 입장하지 않은 이용자의 이름이 적혀 있습니다.'
         ],
         note: '지하 서고의 0번 서가는 도면에 없습니다. 관련 문의는 접수하지 않습니다.'
     },
@@ -45,6 +55,11 @@ const napolitanStories = [
             '진열대 사이에서 바코드 스캐너 소리가 들리면 POS 화면의 시간을 확인하십시오. 04:44라면 퇴근 버튼을 누르지 마십시오.',
             '교대자가 본인과 같은 얼굴로 들어오면 근무일지를 찢고 매장을 나가십시오. 다음 근무자는 이미 도착한 것입니다.'
         ],
+        anomalies: [
+            '자동문 개폐 기록은 있으나 입장 객체가 감지되지 않았습니다.',
+            '폐기 도시락 라벨의 제조 시간이 내일 새벽으로 출력되었습니다.',
+            'CCTV 3번 화면의 계산대 위치가 실제 매장 구조와 다릅니다.'
+        ],
         note: '본 매장은 우산 보관 서비스를 제공하지 않으며, 교대자는 반드시 점장과 동행합니다.'
     },
     {
@@ -60,6 +75,11 @@ const napolitanStories = [
             '호수에서 종소리가 세 번 들리면 모든 지퍼를 닫고 휴대전화 화면 밝기를 최저로 낮추십시오.',
             '아침에 텐트 입구가 호수 방향으로 돌아가 있다면 직접 철수하지 말고 안내소 직원을 부르십시오.',
             '안내소 직원이 젖은 옷을 입고 오면 직원증을 확인하지 말고 A구역 주차장으로 이동하십시오.'
+        ],
+        anomalies: [
+            'B구역 호수 방향에서 숙박객 이름을 부르는 음성이 녹음되었습니다.',
+            '젖은 발자국은 텐트 안쪽에서 시작된 것으로 보입니다.',
+            '안내소 직원 명단에 야간 순찰자가 없습니다.'
         ],
         note: 'B구역에는 종이 설치되어 있지 않습니다. 호수 수위 점검은 낮 시간에만 진행됩니다.'
     },
@@ -77,37 +97,103 @@ const napolitanStories = [
             '방송 종료 후 녹음 파일 길이가 실제 방송보다 길다면 마지막 3분은 재생하지 말고 삭제하십시오.',
             '방송실을 나설 때 출석부에 모르는 이름이 추가되어 있으면 지우지 마십시오. 다음 담당자가 확인할 것입니다.'
         ],
+        anomalies: [
+            '6번 채널의 입력 레벨이 방송 시작 전부터 움직이고 있습니다.',
+            '녹음 파일 끝에 아직 송출하지 않은 안내 멘트가 포함되어 있습니다.',
+            '출석부 마지막 줄의 필압이 점점 진해지고 있습니다.'
+        ],
         note: '동문고등학교 방송실에는 6번 채널 장비가 배정된 적이 없습니다.'
     }
 ];
 
 const storyList = document.getElementById('storyList');
+const consoleStatus = document.getElementById('consoleStatus');
+const signalLabel = document.getElementById('signalLabel');
+const signalFill = document.getElementById('signalFill');
+const documentStamp = document.getElementById('documentStamp');
 const storyTitle = document.getElementById('storyTitle');
 const storyPlace = document.getElementById('storyPlace');
 const storyLevel = document.getElementById('storyLevel');
+const storyProgress = document.getElementById('storyProgress');
 const storyIntro = document.getElementById('storyIntro');
 const storyRules = document.getElementById('storyRules');
 const storyNote = document.getElementById('storyNote');
+const nextRuleBtn = document.getElementById('nextRuleBtn');
+const revealAllBtn = document.getElementById('revealAllBtn');
+const sealBtn = document.getElementById('sealBtn');
+const anomalyPanel = document.getElementById('anomalyPanel');
+const anomalyText = document.getElementById('anomalyText');
+
+let activeStoryIndex = 0;
+let visibleRuleCount = 1;
 
 function renderStory(index) {
     const story = napolitanStories[index];
     if (!story) return;
 
+    activeStoryIndex = index;
+    visibleRuleCount = 1;
+
     document.querySelectorAll('.story-button').forEach((button, buttonIndex) => {
         button.classList.toggle('active', buttonIndex === index);
     });
 
+    documentStamp.textContent = 'OPENED';
     storyTitle.textContent = story.title;
     storyPlace.textContent = story.place;
     storyLevel.textContent = story.level;
     storyIntro.textContent = story.intro;
+    storyNote.textContent = story.note;
+    updateRuleView();
+}
+
+function updateRuleView() {
+    const story = napolitanStories[activeStoryIndex];
+    const progress = Math.round((visibleRuleCount / story.rules.length) * 100);
+
     storyRules.innerHTML = '';
-    story.rules.forEach((rule) => {
+    story.rules.slice(0, visibleRuleCount).forEach((rule, ruleIndex) => {
         const item = document.createElement('li');
         item.textContent = rule;
+        item.style.setProperty('--rule-delay', `${ruleIndex * 45}ms`);
         storyRules.appendChild(item);
     });
-    storyNote.textContent = story.note;
+
+    storyProgress.textContent = `${visibleRuleCount}/${story.rules.length}`;
+    signalLabel.textContent = `${progress}%`;
+    signalFill.style.width = `${progress}%`;
+    documentStamp.textContent = visibleRuleCount === story.rules.length ? 'DO NOT COPY' : 'OPENED';
+    consoleStatus.textContent = visibleRuleCount === story.rules.length
+        ? '문서 전체 열람됨'
+        : `${story.place} 규칙 ${visibleRuleCount}개 열람`;
+
+    const anomalyIndex = Math.min(
+        story.anomalies.length - 1,
+        Math.floor((visibleRuleCount - 1) / Math.ceil(story.rules.length / story.anomalies.length))
+    );
+    anomalyText.textContent = story.anomalies[anomalyIndex];
+    anomalyPanel.classList.toggle('warning', progress >= 72);
+
+    nextRuleBtn.disabled = visibleRuleCount >= story.rules.length;
+    revealAllBtn.disabled = visibleRuleCount >= story.rules.length;
+}
+
+function showNextRule() {
+    const story = napolitanStories[activeStoryIndex];
+    visibleRuleCount = Math.min(story.rules.length, visibleRuleCount + 1);
+    updateRuleView();
+}
+
+function revealAllRules() {
+    visibleRuleCount = napolitanStories[activeStoryIndex].rules.length;
+    updateRuleView();
+}
+
+function sealDocument() {
+    visibleRuleCount = 1;
+    updateRuleView();
+    documentStamp.textContent = 'SEALED';
+    consoleStatus.textContent = '문서 봉인됨';
 }
 
 napolitanStories.forEach((story, index) => {
@@ -118,5 +204,9 @@ napolitanStories.forEach((story, index) => {
     button.addEventListener('click', () => renderStory(index));
     storyList.appendChild(button);
 });
+
+nextRuleBtn.addEventListener('click', showNextRule);
+revealAllBtn.addEventListener('click', revealAllRules);
+sealBtn.addEventListener('click', sealDocument);
 
 renderStory(0);

@@ -24,6 +24,19 @@
                 <p>평범한 공지, 이용 안내, 근무 수칙처럼 읽히지만 문장 사이에서 이상한 규칙이 드러나는 짧은 창작 괴담 모음입니다.</p>
             </header>
 
+            <section class="incident-console" aria-label="열람 상태">
+                <div>
+                    <p class="eyebrow">Access Log</p>
+                    <strong id="consoleStatus">문서 대기 중</strong>
+                </div>
+                <div class="signal-meter" aria-label="이상 징후 감지율">
+                    <span id="signalLabel">0%</span>
+                    <div class="signal-track">
+                        <span id="signalFill"></span>
+                    </div>
+                </div>
+            </section>
+
             <section class="napolitan-reader" aria-label="나폴리탄 괴담 샘플 리더">
                 <aside class="story-list" aria-label="샘플 목록">
                     <div class="section-heading">
@@ -34,13 +47,24 @@
                 </aside>
 
                 <article class="rule-document" id="storyDocument" aria-live="polite">
+                    <div class="document-stamp" id="documentStamp">UNOPENED</div>
                     <div class="document-meta">
                         <span id="storyPlace">-</span>
                         <span id="storyLevel">-</span>
+                        <span id="storyProgress">0/0</span>
                     </div>
                     <h2 id="storyTitle">문서를 선택해 주세요</h2>
                     <p id="storyIntro" class="document-intro"></p>
                     <ol id="storyRules" class="rule-list"></ol>
+                    <div class="document-actions">
+                        <button id="nextRuleBtn" class="action-button compact-action" type="button">다음 규칙 확인</button>
+                        <button id="revealAllBtn" class="secondary-button compact-action" type="button">전체 문서 펼치기</button>
+                        <button id="sealBtn" class="secondary-button compact-action" type="button">문서 봉인</button>
+                    </div>
+                    <aside class="anomaly-panel" id="anomalyPanel" aria-label="이상 징후 기록">
+                        <p class="eyebrow">Anomaly</p>
+                        <p id="anomalyText">문서를 선택하면 감지 기록이 표시됩니다.</p>
+                    </aside>
                     <p id="storyNote" class="document-note"></p>
                 </article>
             </section>

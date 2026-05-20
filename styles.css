@@ -1248,6 +1248,55 @@ h1 {
     line-height: 1.6;
 }
 
+.incident-console {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, .42fr);
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 18px;
+    padding: 16px;
+    border: 1px solid color-mix(in srgb, var(--rose) 36%, var(--line));
+    border-radius: 16px;
+    background:
+        linear-gradient(90deg, color-mix(in srgb, var(--rose) 9%, transparent), transparent 48%),
+        color-mix(in srgb, var(--panel-strong) 80%, transparent);
+}
+
+.incident-console strong {
+    display: block;
+    font-size: 18px;
+    line-height: 1.25;
+}
+
+.signal-meter {
+    display: grid;
+    gap: 8px;
+}
+
+.signal-meter span {
+    color: var(--rose);
+    font-size: 13px;
+    font-weight: 900;
+    text-align: right;
+}
+
+.signal-track {
+    height: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel) 70%, #111 10%);
+}
+
+.signal-track span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--warm), var(--rose));
+    transition: width 220ms ease;
+}
+
 .napolitan-reader {
     display: grid;
     grid-template-columns: minmax(240px, .72fr) minmax(0, 1.28fr);
@@ -1309,6 +1358,7 @@ h1 {
     padding: 24px;
     position: relative;
     overflow: hidden;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--panel-strong) 70%, transparent);
 }
 
 .rule-document::before {
@@ -1325,6 +1375,21 @@ h1 {
 
 .rule-document > * {
     position: relative;
+}
+
+.document-stamp {
+    position: absolute;
+    top: 26px;
+    right: 18px;
+    z-index: 1;
+    padding: 7px 10px;
+    border: 2px solid color-mix(in srgb, var(--rose) 74%, var(--text));
+    color: var(--rose);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0;
+    transform: rotate(6deg);
+    opacity: .72;
 }
 
 .document-meta {
@@ -1370,6 +1435,8 @@ h1 {
     font-size: 15px;
     font-weight: 750;
     line-height: 1.7;
+    animation: ruleFadeIn 180ms ease both;
+    animation-delay: var(--rule-delay);
 }
 
 .rule-list li::marker {
@@ -1377,10 +1444,72 @@ h1 {
     font-weight: 900;
 }
 
+.document-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    margin: 22px 0;
+}
+
+.compact-action {
+    width: auto;
+    min-width: 128px;
+    min-height: 46px;
+    margin: 0;
+    padding: 0 16px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.anomaly-panel {
+    margin: 20px 0 0;
+    padding: 16px;
+    border: 1px solid color-mix(in srgb, var(--warm) 42%, var(--line));
+    border-radius: 14px;
+    background:
+        repeating-linear-gradient(
+            -45deg,
+            color-mix(in srgb, var(--warm) 9%, transparent) 0 8px,
+            transparent 8px 16px
+        ),
+        color-mix(in srgb, var(--panel-strong) 86%, transparent);
+}
+
+.anomaly-panel.warning {
+    border-color: color-mix(in srgb, var(--rose) 58%, var(--line));
+    background:
+        repeating-linear-gradient(
+            -45deg,
+            color-mix(in srgb, var(--rose) 10%, transparent) 0 8px,
+            transparent 8px 16px
+        ),
+        color-mix(in srgb, var(--panel-strong) 86%, transparent);
+}
+
+.anomaly-panel p:last-child {
+    margin: 0;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.55;
+}
+
 .document-note {
     margin-bottom: 0;
+    margin-top: 18px;
     padding-top: 16px;
     border-top: 1px solid var(--line);
+}
+
+@keyframes ruleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .product-hero {
@@ -2362,6 +2491,7 @@ h1 {
     .feature-grid,
     .info-grid,
     .related-list,
+    .incident-console,
     .napolitan-reader,
     .product-hero,
     .pet-widget,
@@ -2447,6 +2577,21 @@ h1 {
     .rule-document {
         min-height: auto;
         padding: 18px;
+    }
+
+    .document-stamp {
+        position: static;
+        display: inline-block;
+        margin-bottom: 12px;
+        transform: rotate(0);
+    }
+
+    .document-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .compact-action {
+        width: 100%;
     }
 }
 

@@ -1248,6 +1248,32 @@ h1 {
     line-height: 1.6;
 }
 
+.mode-switch {
+    display: inline-grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--panel-strong) 72%, transparent);
+}
+
+.mode-button {
+    min-height: 42px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.mode-button.active {
+    background: var(--rose);
+    color: white;
+}
+
 .incident-console {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(220px, .42fr);
@@ -1499,6 +1525,208 @@ h1 {
     margin-top: 18px;
     padding-top: 16px;
     border-top: 1px solid var(--line);
+}
+
+.escape-panel {
+    display: grid;
+    gap: 16px;
+}
+
+.escape-briefing {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px;
+    border: 1px solid color-mix(in srgb, var(--rose) 34%, var(--line));
+    border-radius: 16px;
+    background:
+        linear-gradient(90deg, color-mix(in srgb, var(--rose) 8%, transparent), transparent 52%),
+        color-mix(in srgb, var(--panel-strong) 82%, transparent);
+}
+
+.escape-briefing h2 {
+    margin-bottom: 8px;
+    font-size: clamp(24px, 4vw, 36px);
+    line-height: 1.05;
+}
+
+.escape-briefing p:last-child {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 750;
+    line-height: 1.55;
+}
+
+.escape-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, .58fr) minmax(0, 1.42fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.escape-status,
+.escape-scene {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
+}
+
+.escape-status {
+    display: grid;
+    gap: 18px;
+    padding: 16px;
+}
+
+.status-clock {
+    padding: 16px;
+    border-radius: 14px;
+    background: color-mix(in srgb, #111 8%, var(--panel));
+}
+
+.status-clock span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.status-clock strong {
+    color: var(--rose);
+    font-size: 34px;
+    line-height: 1;
+}
+
+.inventory-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.inventory-list span,
+.inventory-list p {
+    margin: 0;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.escape-risk-track {
+    margin-bottom: 8px;
+}
+
+.escape-risk-label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
+.escape-scene {
+    min-height: 520px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.escape-scene::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 18% 14%, color-mix(in srgb, var(--rose) 10%, transparent), transparent 32%),
+        linear-gradient(color-mix(in srgb, var(--line) 18%, transparent) 1px, transparent 1px);
+    background-size: auto, 100% 34px;
+    opacity: .78;
+}
+
+.escape-scene > * {
+    position: relative;
+}
+
+.scene-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.scene-meta span {
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-strong) 78%, transparent);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+#sceneEnding:not([hidden]) {
+    border-color: color-mix(in srgb, var(--rose) 58%, var(--line));
+    color: var(--rose);
+}
+
+.escape-scene h2 {
+    margin-bottom: 14px;
+    font-size: clamp(26px, 4vw, 44px);
+    line-height: 1.02;
+}
+
+.escape-scene > p {
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 760;
+    line-height: 1.7;
+}
+
+.scene-notice {
+    margin: 18px 0;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--warm) 46%, var(--line));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--warm) 10%, var(--panel-strong));
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 850;
+    line-height: 1.5;
+}
+
+.choice-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.choice-button {
+    min-height: 54px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel) 84%, transparent);
+    color: var(--text);
+    font-weight: 900;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+.choice-button:hover:not(:disabled) {
+    border-color: var(--rose);
+    background: color-mix(in srgb, var(--rose) 9%, var(--panel-strong));
+    transform: translateY(-1px);
+}
+
+.choice-button:disabled {
+    cursor: not-allowed;
+    opacity: .52;
 }
 
 @keyframes ruleFadeIn {
@@ -2493,6 +2721,7 @@ h1 {
     .related-list,
     .incident-console,
     .napolitan-reader,
+    .escape-layout,
     .product-hero,
     .pet-widget,
     .onboarding-grid,
@@ -2592,6 +2821,19 @@ h1 {
 
     .compact-action {
         width: 100%;
+    }
+
+    .mode-switch {
+        width: 100%;
+    }
+
+    .escape-briefing {
+        display: grid;
+    }
+
+    .escape-scene {
+        min-height: auto;
+        padding: 18px;
     }
 }
 

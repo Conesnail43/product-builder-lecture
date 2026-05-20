@@ -123,9 +123,220 @@ const revealAllBtn = document.getElementById('revealAllBtn');
 const sealBtn = document.getElementById('sealBtn');
 const anomalyPanel = document.getElementById('anomalyPanel');
 const anomalyText = document.getElementById('anomalyText');
+const archiveModeBtn = document.getElementById('archiveModeBtn');
+const escapeModeBtn = document.getElementById('escapeModeBtn');
+const archivePanels = document.querySelectorAll('.archive-panel');
+const escapePanel = document.getElementById('escapePanel');
+const restartEscapeBtn = document.getElementById('restartEscapeBtn');
+const escapeClock = document.getElementById('escapeClock');
+const inventoryList = document.getElementById('inventoryList');
+const escapeRiskFill = document.getElementById('escapeRiskFill');
+const escapeRiskLabel = document.getElementById('escapeRiskLabel');
+const sceneTag = document.getElementById('sceneTag');
+const sceneEnding = document.getElementById('sceneEnding');
+const sceneTitle = document.getElementById('sceneTitle');
+const sceneText = document.getElementById('sceneText');
+const sceneNotice = document.getElementById('sceneNotice');
+const choiceList = document.getElementById('choiceList');
 
 let activeStoryIndex = 0;
 let visibleRuleCount = 1;
+let escapeState = {
+    sceneId: 'start',
+    inventory: [],
+    risk: 0
+};
+
+const escapeScenes = {
+    start: {
+        time: '01:00',
+        tag: '근무 시작',
+        title: '해송점의 새벽',
+        text: '점장은 매뉴얼 한 장과 열쇠를 남기고 퇴근했습니다. POS 화면에는 “05:00 이전 퇴근 금지”라는 문구가 깜박입니다.',
+        choices: [
+            { label: '야간 매뉴얼을 먼저 읽는다', next: 'manual', item: '야간 매뉴얼' },
+            { label: '바로 매장 순찰을 시작한다', next: 'aisle', risk: 12, notice: '읽지 않은 규칙은 보통 나중에 더 비싸게 돌아옵니다.' }
+        ]
+    },
+    manual: {
+        time: '01:08',
+        tag: '문서 확인',
+        title: '근무자 전용 매뉴얼',
+        text: '01:17 자동문에 인사하지 말 것. CCTV 3번만 확인할 것. 검은 우산은 보관하지 말 것. 04:44에는 퇴근 버튼을 누르지 말 것.',
+        choices: [
+            { label: '매뉴얼을 접고 CCTV 화면을 켠다', next: 'door', item: 'CCTV 3번 기록' },
+            { label: '매뉴얼 뒷면의 작은 글씨를 확인한다', next: 'backside', item: '뒷면 암호 344' }
+        ]
+    },
+    backside: {
+        time: '01:12',
+        tag: '추가 규칙',
+        title: '뒷면의 작은 글씨',
+        text: '“스캐너 소리가 세 번 들리면 폐기 도시락 라벨의 시간을 POS에 입력하십시오. 단, 04:44는 입력하지 마십시오.”',
+        choices: [
+            { label: 'CCTV 3번 화면으로 돌아간다', next: 'door', item: '폐기 라벨 단서' },
+            { label: '폐기 도시락부터 확인한다', next: 'lunch', item: '폐기 도시락 라벨' }
+        ]
+    },
+    door: {
+        time: '01:17',
+        tag: '자동문 감지',
+        title: '어서 오세요가 목까지 올라옵니다',
+        text: '자동문이 열렸습니다. 매장에는 아무도 없습니다. 하지만 CCTV 3번 화면의 계산대 앞에는 누군가 서 있습니다.',
+        choices: [
+            { label: '어서 오세요라고 말한다', next: 'badGreeting', risk: 100 },
+            { label: 'CCTV 3번 화면만 확인한다', next: 'cctv', item: '빈 손님 영상' },
+            { label: '실제 계산대 쪽을 본다', next: 'badCounter', risk: 80 }
+        ]
+    },
+    cctv: {
+        time: '01:33',
+        tag: 'CCTV 3번',
+        title: '화면 속 계산대',
+        text: '화면 속 손님은 고개를 숙이고 있습니다. 손에는 검은 우산이 있고, 우산 손잡이에 344라는 숫자가 붙어 있습니다.',
+        choices: [
+            { label: '344를 메모한다', next: 'umbrella', item: '우산 번호 344' },
+            { label: '화면 속 손님에게 손을 흔든다', next: 'badCounter', risk: 60 }
+        ]
+    },
+    umbrella: {
+        time: '02:06',
+        tag: '검은 우산',
+        title: '젖지 않은 우산',
+        text: '자동문 옆에 검은 우산이 세워져 있습니다. 바닥은 말라 있는데 우산 끝에서 물이 떨어집니다.',
+        choices: [
+            { label: '보관함이 없다고 말한다', next: 'music', item: '거절 완료' },
+            { label: '창고에 보관한다', next: 'badUmbrella', risk: 90 },
+            { label: '우산 손잡이 번호를 POS에 입력한다', next: 'scanner', requires: '우산 번호 344', notice: 'POS가 344를 임시 점검 코드로 인식했습니다.' }
+        ]
+    },
+    music: {
+        time: '03:00',
+        tag: '매장 음악',
+        title: '동요가 재생됩니다',
+        text: '스피커에서 처음 듣는 동요가 흘러나옵니다. 창고 문 안쪽에서 바코드 스캐너 소리가 한 번 들립니다.',
+        choices: [
+            { label: '창고 문을 잠근다', next: 'scanner', item: '잠긴 창고' },
+            { label: '음악 전원을 끈다', next: 'badMusic', risk: 75 },
+            { label: '폐기 도시락 라벨을 확인한다', next: 'lunch', item: '폐기 도시락 라벨' }
+        ]
+    },
+    lunch: {
+        time: '03:21',
+        tag: '폐기 확인',
+        title: '내일 제조된 도시락',
+        text: '가장 위 도시락 라벨에는 제조 시간이 04:44로 찍혀 있습니다. 수량은 전산보다 하나 많습니다.',
+        choices: [
+            { label: '라벨만 떼어 POS 옆에 둔다', next: 'scanner', item: '04:44 라벨' },
+            { label: '도시락을 열어 본다', next: 'badLunch', risk: 85 }
+        ]
+    },
+    scanner: {
+        time: '04:44',
+        tag: '퇴근 버튼 잠김',
+        title: '스캐너 소리 세 번',
+        text: '진열대 사이에서 삑, 삑, 삑. POS 화면의 퇴근 버튼이 붉게 켜집니다. 지금 누르면 안 된다는 규칙이 떠오릅니다.',
+        choices: [
+            { label: '퇴근 버튼을 누른다', next: 'badCheckout', risk: 100 },
+            { label: '04:44 라벨을 스캔한다', next: 'logbook', requires: '04:44 라벨', item: '스캔된 라벨' },
+            { label: '344 점검 코드를 입력한다', next: 'logbook', requires: '우산 번호 344', item: '점검 코드 승인' },
+            { label: '아무것도 하지 않고 05:00까지 기다린다', next: 'double', risk: 30 }
+        ]
+    },
+    logbook: {
+        time: '04:58',
+        tag: '근무일지',
+        title: '찢어진 근무일지',
+        text: '근무일지 마지막 줄에 당신의 이름이 이미 적혀 있습니다. 그 아래에는 “교대자가 도착하면 얼굴을 확인하지 말 것”이라고 쓰여 있습니다.',
+        choices: [
+            { label: '근무일지를 찢고 매장을 나간다', next: 'goodEnding', item: '찢어진 근무일지' },
+            { label: '교대자의 얼굴을 확인한다', next: 'badDouble', risk: 100 },
+            { label: '관리실에 전화를 건다', next: 'recordedEnding', risk: 35 }
+        ]
+    },
+    double: {
+        time: '05:00',
+        tag: '교대',
+        title: '같은 얼굴',
+        text: '자동문이 열리고 당신과 같은 얼굴의 교대자가 들어옵니다. 그는 웃으며 “늦으셨네요”라고 말합니다.',
+        choices: [
+            { label: '근무일지를 찢는다', next: 'goodEnding', requires: '야간 매뉴얼' },
+            { label: '왜 내 얼굴이냐고 묻는다', next: 'badDouble', risk: 100 }
+        ]
+    },
+    goodEnding: {
+        time: '05:01',
+        tag: 'END 1',
+        title: '정상 탈출',
+        text: '당신은 근무일지를 찢고 매장을 나왔습니다. 뒤에서 자동문이 열리는 소리가 났지만, 돌아보지 않았습니다.',
+        ending: '생존',
+        choices: []
+    },
+    recordedEnding: {
+        time: '05:00',
+        tag: 'END 2',
+        title: '매장에 기록됨',
+        text: '수화기 너머의 목소리가 당신의 근무 시작 시간을 묻습니다. POS 화면에는 내일 01:00 근무자로 당신의 이름이 다시 등록됩니다.',
+        ending: '반복',
+        choices: []
+    },
+    badGreeting: {
+        time: '01:17',
+        tag: 'END 3',
+        title: '응답',
+        text: '“어서 오세요”라는 말이 매장 스피커에서 한 박자 늦게 반복됩니다. CCTV 3번 화면의 손님이 고개를 듭니다.',
+        ending: '규칙 위반',
+        choices: []
+    },
+    badCounter: {
+        time: '01:18',
+        tag: 'END 4',
+        title: '화면 밖의 계산대',
+        text: '실제 계산대 앞에는 아무도 없습니다. 화면 속 계산대 앞에는 당신이 서 있습니다.',
+        ending: '전환',
+        choices: []
+    },
+    badUmbrella: {
+        time: '02:07',
+        tag: 'END 5',
+        title: '보관된 우산',
+        text: '창고 문을 닫자 안쪽에서 빗소리가 납니다. 해송점에는 창문이 없습니다.',
+        ending: '봉인 실패',
+        choices: []
+    },
+    badMusic: {
+        time: '03:01',
+        tag: 'END 6',
+        title: '끊긴 음악',
+        text: '전원을 끄자 매장이 너무 조용해집니다. 이제 스캐너 소리가 어디서 나는지 정확히 들립니다. 바로 뒤입니다.',
+        ending: '규칙 위반',
+        choices: []
+    },
+    badLunch: {
+        time: '03:22',
+        tag: 'END 7',
+        title: '열린 도시락',
+        text: '도시락 안에는 음식 대신 접힌 영수증이 있습니다. 결제 시간은 내일 04:44, 상품명은 당신의 이름입니다.',
+        ending: '기록됨',
+        choices: []
+    },
+    badCheckout: {
+        time: '04:44',
+        tag: 'END 8',
+        title: '조기 퇴근',
+        text: '퇴근 처리가 완료되었습니다. 자동문은 열리지 않고, POS는 다음 근무자 이름을 출력합니다. 당신입니다.',
+        ending: '폐점',
+        choices: []
+    },
+    badDouble: {
+        time: '05:00',
+        tag: 'END 9',
+        title: '교대자',
+        text: '그는 당신보다 먼저 인사합니다. 그리고 당신이 해야 했던 대답을 정확히 알고 있습니다.',
+        ending: '대체',
+        choices: []
+    }
+};
 
 function renderStory(index) {
     const story = napolitanStories[index];
@@ -196,6 +407,100 @@ function sealDocument() {
     consoleStatus.textContent = '문서 봉인됨';
 }
 
+function setNapolitanMode(mode) {
+    const isArchive = mode === 'archive';
+    archivePanels.forEach((panel) => {
+        panel.hidden = !isArchive;
+    });
+    escapePanel.hidden = isArchive;
+    archiveModeBtn.classList.toggle('active', isArchive);
+    escapeModeBtn.classList.toggle('active', !isArchive);
+    archiveModeBtn.setAttribute('aria-selected', String(isArchive));
+    escapeModeBtn.setAttribute('aria-selected', String(!isArchive));
+}
+
+function resetEscape() {
+    escapeState = {
+        sceneId: 'start',
+        inventory: [],
+        risk: 0
+    };
+    renderEscapeScene();
+}
+
+function addInventory(item) {
+    if (item && !escapeState.inventory.includes(item)) {
+        escapeState.inventory.push(item);
+    }
+}
+
+function renderInventory() {
+    inventoryList.innerHTML = '';
+    if (!escapeState.inventory.length) {
+        const empty = document.createElement('p');
+        empty.textContent = '아직 확보한 단서가 없습니다.';
+        inventoryList.appendChild(empty);
+        return;
+    }
+
+    escapeState.inventory.forEach((item) => {
+        const badge = document.createElement('span');
+        badge.textContent = item;
+        inventoryList.appendChild(badge);
+    });
+}
+
+function renderEscapeScene(notice = '') {
+    const scene = escapeScenes[escapeState.sceneId];
+    if (!scene) return;
+
+    escapeClock.textContent = scene.time;
+    sceneTag.textContent = scene.tag;
+    sceneEnding.textContent = scene.ending ? scene.ending : '';
+    sceneEnding.hidden = !scene.ending;
+    sceneTitle.textContent = scene.title;
+    sceneText.textContent = scene.text;
+    escapeRiskFill.style.width = `${Math.min(100, escapeState.risk)}%`;
+    escapeRiskLabel.textContent = escapeState.risk >= 70
+        ? '위험: 규칙이 이미 당신을 인식했습니다.'
+        : escapeState.risk >= 30
+            ? '주의: 규칙 위반 가능성이 누적 중입니다.'
+            : '규칙 위반 없음';
+
+    sceneNotice.hidden = !notice;
+    sceneNotice.textContent = notice;
+    renderInventory();
+
+    choiceList.innerHTML = '';
+    if (!scene.choices.length) {
+        const restart = document.createElement('button');
+        restart.className = 'choice-button';
+        restart.type = 'button';
+        restart.textContent = '다시 근무 시작';
+        restart.addEventListener('click', resetEscape);
+        choiceList.appendChild(restart);
+        return;
+    }
+
+    scene.choices.forEach((choice) => {
+        const button = document.createElement('button');
+        const hasRequiredItem = !choice.requires || escapeState.inventory.includes(choice.requires);
+        button.className = 'choice-button';
+        button.type = 'button';
+        button.disabled = !hasRequiredItem;
+        button.textContent = hasRequiredItem ? choice.label : `${choice.label} - ${choice.requires} 필요`;
+        button.addEventListener('click', () => chooseEscapeOption(choice));
+        choiceList.appendChild(button);
+    });
+}
+
+function chooseEscapeOption(choice) {
+    addInventory(choice.item);
+    escapeState.risk = Math.min(100, escapeState.risk + (choice.risk || 0));
+    escapeState.sceneId = choice.next;
+    renderEscapeScene(choice.notice || '');
+}
+
 napolitanStories.forEach((story, index) => {
     const button = document.createElement('button');
     button.className = 'story-button';
@@ -208,5 +513,9 @@ napolitanStories.forEach((story, index) => {
 nextRuleBtn.addEventListener('click', showNextRule);
 revealAllBtn.addEventListener('click', revealAllRules);
 sealBtn.addEventListener('click', sealDocument);
+archiveModeBtn.addEventListener('click', () => setNapolitanMode('archive'));
+escapeModeBtn.addEventListener('click', () => setNapolitanMode('escape'));
+restartEscapeBtn.addEventListener('click', resetEscape);
 
 renderStory(0);
+resetEscape();

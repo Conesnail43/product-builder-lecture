@@ -243,8 +243,30 @@ function cleanText(text) {
     return text.replace(/\s+/g, ' ').trim();
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getSafeUrl(url, fallback) {
+    try {
+        const parsed = new URL(url, window.location.origin);
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+            return parsed.href;
+        }
+    } catch {
+        return fallback;
+    }
+    return fallback;
+}
+
 function getPrimaryLink(event) {
-    return event.links?.[0]?.link || `https://wikipedia.org/wiki/${encodeURIComponent(activeDateLabel.replace(' ', '_'))}`;
+    const fallback = `https://wikipedia.org/wiki/${encodeURIComponent(activeDateLabel.replace(' ', '_'))}`;
+    return getSafeUrl(event.links?.[0]?.link, fallback);
 }
 
 function getInterestScore(event) {
@@ -417,8 +439,8 @@ function renderCategoryFilter() {
     const categories = ['전체', ...new Set(facts.map((fact) => fact.category))];
 
     categoryFilter.innerHTML = categories.map((category) => `
-        <button class="filter-chip ${category === activeCategory ? 'active' : ''}" type="button" data-category="${category}">
-            ${category}
+        <button class="filter-chip ${category === activeCategory ? 'active' : ''}" type="button" data-category="${escapeHtml(category)}">
+            ${escapeHtml(category)}
         </button>
     `).join('');
 }
@@ -435,8 +457,8 @@ function renderRelatedFacts(currentIndex) {
 
     relatedList.innerHTML = filtered.map(({ fact, index }) => `
         <button class="related-item" type="button" data-index="${index}">
-            <span>${fact.category}</span>
-            <strong>${fact.title}</strong>
+            <span>${escapeHtml(fact.category)}</span>
+            <strong>${escapeHtml(fact.title)}</strong>
         </button>
     `).join('');
 }

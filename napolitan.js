@@ -147,6 +147,13 @@ let escapeState = {
     risk: 0
 };
 
+function appendTextElement(parent, tagName, text) {
+    const element = document.createElement(tagName);
+    element.textContent = text;
+    parent.appendChild(element);
+    return element;
+}
+
 const escapeScenes = {
     start: {
         time: '01:00',
@@ -505,7 +512,8 @@ napolitanStories.forEach((story, index) => {
     const button = document.createElement('button');
     button.className = 'story-button';
     button.type = 'button';
-    button.innerHTML = `<span>${story.place}</span><strong>${story.title}</strong>`;
+    appendTextElement(button, 'span', story.place);
+    appendTextElement(button, 'strong', story.title);
     button.addEventListener('click', () => renderStory(index));
     storyList.appendChild(button);
 });

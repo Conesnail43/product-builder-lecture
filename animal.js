@@ -48,6 +48,15 @@ function setStatus(message) {
     statusText.textContent = message;
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function clearObjectUrl() {
     if (activeObjectUrl) {
         URL.revokeObjectURL(activeObjectUrl);
@@ -95,7 +104,7 @@ function renderPredictions(predictions) {
         return `
             <div class="prediction-item">
                 <div class="prediction-meta">
-                    <span>${p.className}</span>
+                    <span>${escapeHtml(p.className)}</span>
                     <strong>${score}%</strong>
                 </div>
                 <div class="meter"><span style="width:${score}%"></span></div>

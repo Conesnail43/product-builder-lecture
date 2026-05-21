@@ -221,6 +221,15 @@ function savePet(target = pet) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(target));
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function clamp(value, min = 0, max = 100) {
     return Math.max(min, Math.min(max, value));
 }
@@ -628,9 +637,9 @@ function renderGrowthLog() {
     }
     growthLog.innerHTML = pet.log.slice(0, 8).map((entry) => `
         <article class="growth-entry">
-            <span>${entry.date} · Lv.${entry.stage || pet.stage}</span>
-            <strong>${entry.name}</strong>
-            <p>${entry.text}</p>
+            <span>${escapeHtml(entry.date)} · Lv.${entry.stage || pet.stage}</span>
+            <strong>${escapeHtml(entry.name)}</strong>
+            <p>${escapeHtml(entry.text)}</p>
         </article>
     `).join('');
 }
